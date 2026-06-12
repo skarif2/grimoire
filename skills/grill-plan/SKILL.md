@@ -1,6 +1,6 @@
 ---
 name: grill-plan
-description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Creates a plan file and optionally an ADR. Use with /plan to stress-test an idea.
+description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Creates a plan file and optionally an ADR, then stays in refinement mode to fold in changes until you're done. Use with /plan to stress-test an idea.
 ---
 
 <what-to-do>
@@ -313,9 +313,33 @@ Tell the user the plan file path and any ADR/context files created. Then open th
 open_in_editor "$DOCS_ROOT/plans/$FILENAME"
 ```
 
+Then announce refinement mode (see `<refinement-mode>` below):
+> "Plan saved at `$DOCS_ROOT/plans/$FILENAME`. We're in refinement mode — tell me any changes and I'll fold them into the file. Say 'done' (or run `/gg`) when it's ready."
+
+</output>
+
+<refinement-mode>
+
+After the plan file is written, the conversation enters **refinement mode**. The plan file is now the working document — keep it as the source of truth so it never drifts out of sync with what was actually decided.
+
+**While in refinement mode:**
+
+- When the user refines scope, approach, tasks, or decisions, edit the plan file directly with the `Edit` tool — don't just discuss the change in chat. After editing, confirm in one line what changed (e.g. "Updated — added a task for the migration step").
+- Use judgment: edit the file when the user is changing the plan; just answer when the user is only asking a question about it. Not every message is a plan edit.
+- Every task MUST keep its `verify:` condition. If a refinement adds a task, add a `verify:` for it too.
+- After a substantive change, re-index the plan so future sessions see the current version:
+```
+ctx_index(
+  content: "Plan: [plan title]\nGoal: [one-sentence goal]\nDecisions: [current key decisions]",
+  source: "$PROJECT_ID:plans"
+)
+```
+
+**Exit refinement mode** when the user signals completion ("done", "looks good", "that's it"), switches to an unrelated task, or runs `/gg`. On exit:
+
 If a handoff file was loaded at the start, ask before deleting:
 > "Delete the handoff file `[filename]`? The plan supersedes it."
 
 Only delete if the user confirms — never delete silently.
 
-</output>
+</refinement-mode>
