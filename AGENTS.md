@@ -90,7 +90,16 @@ For multi-URL fetches or multi-API calls always pass `concurrency: N` (1-8):
 
 ## Output
 
-Write artifacts to files — never inline. Return the file path and a one-line description.
+Two separate disciplines — do not let the first suppress the second:
+
+**Context discipline** — keep raw bytes OUT of context. Write artifacts to files, never inline; return the file path and a one-line description. Process data in the sandbox and surface only the result.
+
+**Presentation discipline** — format the answer you DO surface; "one-line" means concise, not unstyled:
+- Multi-row or multi-field results → markdown table.
+- Grouped findings → `##` headings + bullets; code, paths, and commands → fenced blocks or backticks.
+- Use **bold** for key terms and inline links; never emit a bare wall of plain text.
+
+> Agent-specific (Claude Code only — PI ignores): when using the `AskUserQuestion` tool, keep option labels ≤5 words and descriptions ≤1 sentence; never paste raw tool output or snippets into options. The question box is harness-rendered and cannot be themed, so its readability depends entirely on short, clean content.
 
 ## Session Continuity
 
