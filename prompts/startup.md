@@ -27,19 +27,27 @@ echo "Project: $PROJECT_ID"
 
 ## 2. Load files and query indexed knowledge
 
+**Read `index.md` first — it's the map.** Load the catalog, then drill only into the distilled pages whose one-line summaries are relevant to the task; don't bulk-load every concept/component. Context + ADRs are cheap, load them fully.
+
 ```
 ctx_batch_execute(
   commands: [
+    { label: "Project index (the MAP — read first)", command: "cat $DOCS_ROOT/index.md 2>/dev/null || echo 'none'" },
     { label: "Project context", command: "cat $DOCS_ROOT/context/*.md 2>/dev/null || echo 'none'" },
     { label: "Project ADRs", command: "cat $DOCS_ROOT/adr/*.md 2>/dev/null || echo 'none'" },
+    { label: "Project gotchas", command: "cat $DOCS_ROOT/gotchas.md 2>/dev/null || echo 'none'" },
+    { label: "Available concepts/components", command: "ls $DOCS_ROOT/concepts $DOCS_ROOT/components $DOCS_ROOT/lessons 2>/dev/null || echo 'none'" },
     { label: "Active plans", command: "ls $DOCS_ROOT/plans/*.md 2>/dev/null || echo 'none'" },
     { label: "Pending handoffs", command: "ls $DOCS_ROOT/handoffs/*.md 2>/dev/null || echo 'none'" },
+    { label: "Shared index", command: "cat $SHARED_ROOT/index.md 2>/dev/null || echo 'none'" },
     { label: "Shared context", command: "cat $SHARED_ROOT/context/*.md 2>/dev/null || echo 'none'" },
     { label: "Shared ADRs", command: "cat $SHARED_ROOT/adr/*.md 2>/dev/null || echo 'none'" }
   ],
-  queries: ["domain terms", "architecture decisions", "active tasks", "API contracts", "pending handoffs"]
+  queries: ["domain terms", "architecture decisions", "active tasks", "known gotchas", "pending handoffs"]
 )
 ```
+
+Once the task is known, follow the index's `[[wikilinks]]` into the specific `concepts/`, `components/`, and `lessons/` pages that matter — that targeted drill-in is the point of the map.
 
 Then query the index for recent decisions, patterns, and pending work:
 ```
@@ -52,6 +60,6 @@ ctx_search(queries: ["decision", "pattern", "shared"], source: "$GROUP", sort: "
 
 ## 3. Summarise in 3–5 bullets
 
-Cover what you found: domain terms defined, active plan filenames, architecture decisions in place, past review patterns, and shared cross-project context. List plan and handoff filenames — don't load their content.
+Cover what you found: what the `index.md` catalogs (how many concepts/components/lessons exist), domain terms defined, architecture decisions in place, known gotchas, and active plan/handoff filenames. List plan and handoff filenames — don't load their content. If `index.md` is missing or empty, note it — the project hasn't been distilled yet.
 
 Then ask: "What are we working on today?"

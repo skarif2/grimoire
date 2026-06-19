@@ -45,3 +45,10 @@ Create the `plans/` directory lazily — only when the first plan is written. Ke
 - The Goal must be a single verifiable sentence. "Make it work" is not a goal.
 - Context should be brief — 3–5 bullets or a short paragraph. Not a design doc.
 - Out of scope is mandatory. Explicit scope prevents creep.
+
+## Wikilinks & distillation
+
+A plan is a **raw source**, not a wiki page — it is *not* listed in `index.md`. But it is the primary input to distillation:
+
+- **Link the distilled pages it relied on.** When the planning interview used a `[[concept_{slug}]]`, `[[component_{slug}]]`, or `[[adr_{slug}]]`, reference it in Context so the trail is explicit.
+- **At close, `/gg` distils this plan** into the wiki layer (new/updated concept, component, lesson, gotcha pages) and links those pages back to the plan via their `Source:` line. The plan itself stays a dated, write-once record.

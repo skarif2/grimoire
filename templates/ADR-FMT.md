@@ -45,3 +45,16 @@ If any one is missing, skip it.
 - Anything easy to reverse
 - Implementation details or patterns (those belong in context files or comments)
 - Decisions that are self-evident from the code
+
+## Wikilinks
+
+ADRs are part of the **distilled wiki layer**. When an ADR governs a concept or component, end it with a `## Related` line linking them, and ensure the governed page links back (`Governed by [[adr_{slug}]]`):
+
+```md
+## Related
+
+- [[component_{slug}]] — what this decision shapes
+- [[concept_{slug}]] — the mechanism it constrains
+```
+
+Every ADR must be listed in the project's `index.md` under **Decisions**.

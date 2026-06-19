@@ -332,6 +332,22 @@ Skip indexing if the review found only one-off issues with no reusable signal.
 
 </output>
 
+<distillation>
+
+After the review is saved and indexed, **distil durable learnings into the wiki layer (draft → confirm)**. A review is a *raw source*; its lasting value — not the per-line nits — should compound into the distilled wiki. Most valuable in `pr` and `local` mode; usually skip for `staged` (pre-commit, ephemeral).
+
+(See the "Compiled Wiki Layer" section of `~/GRIMOIRE/AGENTS.md` and `~/GRIMOIRE/templates/{CONCEPT,COMPONENT,LESSON,GOTCHA,INDEX}-FMT.md`.)
+
+1. From the findings + the diff, pick only **durable** items: a recurring trap → **gotcha**; a non-obvious behaviour of a module → **component** note; a root cause or pattern worth remembering → **lesson** or **concept**. Per-PR nitpicks and one-offs do **not** qualify.
+2. For each, check `$DOCS_ROOT/{concepts,components,lessons}/` and `$DOCS_ROOT/gotchas.md` — **update existing pages in place**, don't duplicate.
+3. Draft each page/entry with mandatory `Source:` (this review + `path:line`/PR #), `Status:`/`Updated:`, and `[[wikilinks]]`. Draft the matching `index.md` entries and backlinks.
+4. **Present the drafts as a confirm batch** (each NEW/UPDATE + one-line summary). Do **not** write until the user approves. On `approve`: write the pages, update `$DOCS_ROOT/index.md`, and `ctx_index` each with its `$PROJECT_ID:<type>` source. On `revise: <note>`: adjust and re-present.
+5. If nothing durable surfaced, **say so and skip** — never manufacture pages.
+
+When checking "Conflicts with project decisions" above, also consult the distilled `concepts/` and `gotchas.md`, not just ADRs/context — a change may contradict a documented mechanism or trip a known gotcha.
+
+</distillation>
+
 <guidelines>
 
 - Be specific — point to file names and what the issue is, not vague statements like "this could be improved"

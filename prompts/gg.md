@@ -52,6 +52,12 @@ Plan approved. Execute now.
    mkdir -p "$PLAN_DIR/archived"
    mv "$PLAN_FILE" "$PLAN_DIR/archived/"
    ```
+7. **Distil into the wiki layer (draft → confirm).** The finished plan is a *raw source*; now compile its durable knowledge into the distilled wiki so future work benefits. (See the "Compiled Wiki Layer" section of `~/GRIMOIRE/AGENTS.md` and the page formats in `~/GRIMOIRE/templates/{CONCEPT,COMPONENT,LESSON,GOTCHA,INDEX}-FMT.md`.)
+   - Re-read the finished plan **and the actual diff** (`ctx_execute(shell, "git diff …")`). Identify durable knowledge: a mechanism learned → **concept**; a module created/heavily touched → **component**; a non-obvious root cause or rejected approach → **lesson**; a sharp trap → **gotcha** entry.
+   - For each, decide **new page vs. update existing** — check `$DOCS_ROOT/{concepts,components,lessons}/` and `$DOCS_ROOT/gotchas.md`. Never duplicate; revise in place.
+   - Draft each page with mandatory `Source:` (this plan + `path:line`/PR), `Status:`/`Updated:`, and `[[wikilinks]]` to related pages. Draft the matching `index.md` entries and any backlinks on existing pages.
+   - **Present the drafts as a confirm batch** — list each proposed page (NEW or UPDATE) with a one-line summary. Do **not** write until the user approves. On `approve`: write the pages, update `$DOCS_ROOT/index.md`, and `ctx_index` each with its `$PROJECT_ID:<type>` source (e.g. `:concepts`, `:gotchas`, `:index`). On `revise: <note>`: adjust and re-present.
+   - If the change produced nothing durable (trivial fix), **say so and skip** — never manufacture pages.
 
 ## Execution guidelines
 

@@ -37,3 +37,14 @@ _Avoid_: {synonyms}
 - **Project-level** (`docs/[group]/[project]/context/`): Terms specific to one project's domain — component names, feature terminology, local patterns.
 
 When a term applies group-wide, put it in the group-level file, not duplicated per project.
+
+## Wikilinks
+
+Context files are part of the **distilled wiki layer**. When a term has a deeper page, link it inline so the glossary becomes an entry point into the graph:
+
+```md
+**{Term}**:
+{Definition.} See [[concept_{slug}]] for how it works.
+```
+
+Every context file must be listed in the project's `index.md` under **Context**.

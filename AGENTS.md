@@ -8,11 +8,12 @@ All project-specific knowledge lives under `~/GRIMOIRE/docs/`, mirroring the `~/
 ```
 ~/GRIMOIRE/docs/
 ├── {group}/                    ← e.g. acme, initech, personal
-│   ├── context/                ← group-level shared context (API contracts, cross-project terms)
-│   ├── adr/                    ← group-level shared decisions
+│   ├── index.md · context/ · adr/ · concepts/   ← group-level shared distilled pages
 │   └── {project}/              ← e.g. frontend, scanner, pipeline
-│       ├── context/
-│       ├── adr/
+│       ├── index.md            ← MAP — catalog of distilled pages; READ FIRST, then drill in
+│       │   ── distilled wiki (durable, interlinked, read on every task) ──
+│       ├── context/ · adr/ · concepts/ · components/ · lessons/ · gotchas.md
+│       │   ── raw sources (episodic, dated, write-once; inputs to distillation) ──
 │       ├── handoffs/           ← ideas from /handoff — deleted after /plan supersedes it (with confirmation)
 │       ├── plans/              ← active tasks only (≤5); archived/ when done via /gg
 │       └── reviews/
@@ -24,8 +25,9 @@ Key variables (derived from the current working directory):
 - `PROJECT_ID` — identifier used for ctx labels (e.g. `acme/frontend`)
 
 At the start of any session:
-1. Load files from `$DOCS_ROOT/context/`, `$DOCS_ROOT/adr/`, `$SHARED_ROOT/context/`, `$SHARED_ROOT/adr/`
-2. Query indexed knowledge: `ctx_search(queries: ["[task keywords]"], source: "$PROJECT_ID")`
+1. **Read `$DOCS_ROOT/index.md` first** — the map. Pick relevant distilled pages by their one-line summaries, then open only those (follow their `[[wikilinks]]`). This precedes loading raw files and is cheaper than scanning everything.
+2. Load `$DOCS_ROOT/context/`, `$DOCS_ROOT/adr/` and the pages the index pointed to; also `$SHARED_ROOT/index.md` + `$SHARED_ROOT/context/` + `$SHARED_ROOT/adr/`.
+3. Query indexed knowledge: `ctx_search(queries: ["[task keywords]"], source: "$PROJECT_ID")` — secondary to the index, not a replacement for it.
 
 ## Knowledge Indexing
 
@@ -34,6 +36,11 @@ Skills index files when they create them. Source label uses `PROJECT_ID` format 
 - Plans → `source: "$PROJECT_ID:plans"`
 - ADRs → `source: "$PROJECT_ID:adr"`
 - Context terms → `source: "$PROJECT_ID:context"`
+- Concepts → `source: "$PROJECT_ID:concepts"`
+- Components → `source: "$PROJECT_ID:components"`
+- Lessons → `source: "$PROJECT_ID:lessons"`
+- Gotchas → `source: "$PROJECT_ID:gotchas"`
+- Index → `source: "$PROJECT_ID:index"`
 - Review patterns → `source: "$PROJECT_ID:patterns"`
 - Review summaries → `source: "$PROJECT_ID:reviews"`
 - Handoffs → `source: "$PROJECT_ID:handoffs"`
@@ -44,11 +51,34 @@ Before writing any knowledge file, load the relevant format template from `~/GRI
 
 | File type | Template |
 |---|---|
+| Index | `INDEX-FMT.md` |
 | ADR | `ADR-FMT.md` |
 | Context file | `CONTEXT-FMT.md` |
+| Concept | `CONCEPT-FMT.md` |
+| Component | `COMPONENT-FMT.md` |
+| Lesson | `LESSON-FMT.md` |
+| Gotcha | `GOTCHA-FMT.md` |
 | Handoff | `HANDOFF-FMT.md` |
 | Plan | `PLAN-FMT.md` |
 | Review | `REVIEW-FMT.md` |
+
+## Compiled Wiki Layer
+
+GRIMOIRE has two layers with a hard boundary (Karpathy's LLM-wiki pattern):
+
+- **Raw sources** — `plans/`, `reviews/`, `handoffs/`. Episodic, dated, write-once. Records of *a moment*. Written by `/plan`, `/gg`, `/review`. **Never listed in `index.md`.** They are the *inputs* to distillation, not knowledge to load later.
+- **Distilled wiki** — `context/`, `adr/`, `concepts/`, `components/`, `lessons/`, `gotchas.md`. Durable, interlinked, kept current. This is what the AI loads on future work. Compiled *from* raw sources.
+- **The map** — `index.md`. Catalogs every distilled page with a one-line summary. Read first.
+
+**Distillation** happens at ticket close, folded into `/gg` (after execution) and `/review` (after a review): read the raw source just produced, then **draft** new/updated distilled pages + `index.md` entries + backlinks, and **present them for the user to confirm** before writing. Never auto-write the wiki — drafts are confirmed (avoids stale synthesis masquerading as truth).
+
+**Every distilled page must have:**
+- **Provenance** — a `Source:` line citing the plan/review/`file:line`/PR it came from.
+- **Freshness** — `Status:` (current | needs-verification | stale) + `Updated:` date.
+- **Wikilinks** — `[[concept_slug]]`, `[[component_slug]]`, `[[adr_slug]]`, `[[gotchas#heading]]`. A page with no inbound or outbound links is an orphan (lint flags it).
+- **An `index.md` entry** — added in the same pass that creates the page.
+
+**Naming:** `concept_{slug}.md`, `component_{slug}.md`, `lesson_{slug}.md`, `adr_{slug}.md`, `context_{slug}.md`; gotchas are `###` entries inside one `gotchas.md`.
 
 # context-mode — MANDATORY routing rules
 

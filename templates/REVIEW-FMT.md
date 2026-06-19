@@ -50,3 +50,10 @@ Create the `reviews/` directory lazily — only when the first review is saved.
 - Don't flag deliberate decisions — check ADRs and context files before calling something wrong.
 - Don't suggest unrelated improvements — review what's in the diff, not the surrounding code.
 - Adapt depth to diff size — a 2-file staged change doesn't need the same structure as a 30-file PR.
+
+## Wikilinks & distillation
+
+A review is a **raw source**, not a wiki page — it is *not* listed in `index.md`. But durable learnings in it should be distilled:
+
+- **Check the wiki before flagging.** When verifying against decisions/patterns, link the `[[adr_{slug}]]` or `[[concept_{slug}]]` you checked, so "Conflicts with project decisions" is traceable.
+- **At close, `/review` distils durable PR learnings** — new gotchas, component notes, lessons — into the wiki layer (draft → you confirm), linking those pages back to this review via their `Source:` line. The review file stays a dated record.
