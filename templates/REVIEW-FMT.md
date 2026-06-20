@@ -2,7 +2,7 @@
 
 Review files live in `docs/[group]/[project]/reviews/`. Use file naming:
 - Local/staged: `[date]-[branch-slug]-review-1.md`, `[date]-[branch-slug]-review-2.md`, etc. (counter always included, starts at 1)
-- PR: `[date]-pr-[number].md`
+- PR: `[date]-pr-[number]-[title-slug].md` (slug derived from the PR title, lowercase and hyphenated, max 40 chars)
 
 Create the `reviews/` directory lazily — only when the first review is saved.
 

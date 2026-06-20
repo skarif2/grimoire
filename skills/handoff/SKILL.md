@@ -6,7 +6,7 @@ argument-hint: "[the new idea or task to hand off]"
 
 <what-to-do>
 
-A new idea surfaced during this conversation that belongs in its own session. Capture it with just enough context for a fresh agent to start cold — no more.
+A new idea surfaced during this conversation that belongs in its own session. Capture it with just enough context for a fresh agent to start cold, no more.
 
 Do not summarise the current session. Focus entirely on the new idea.
 
@@ -65,7 +65,7 @@ mkdir -p "$HANDOFF_DIR"
 HANDOFF_PATH="$HANDOFF_DIR/handoff_${DATE}-${SLUG}.md"
 ```
 
-If the user passed an argument, that IS the idea — don't invent a different framing.
+If the user passed an argument, that IS the idea, don't invent a different framing.
 
 After writing the file, open it:
 

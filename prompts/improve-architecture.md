@@ -1,5 +1,5 @@
 ---
-description: Improve Architecture — explore architectural friction, produce a visual HTML report, then grill on the candidate you pick
+description: Improve Architecture, explore architectural friction, produce a visual HTML report, then grill on the candidate you pick
 argument-hint: "[area to focus on, or leave blank to explore the whole codebase]"
 ---
 $ARGUMENTS

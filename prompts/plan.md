@@ -1,5 +1,5 @@
 ---
-description: Plan — explore, interview, then create a scoped plan file
+description: Plan, explore, interview, then create a scoped plan file
 argument-hint: "<task description>"
 ---
 $ARGUMENTS
@@ -12,6 +12,7 @@ The skill will:
 3. Explore the codebase to understand what already exists
 4. Ask clarifying questions one at a time
 5. Optionally create an ADR or update context if warranted
-6. Save the plan to `~/GRIMOIRE/docs/[group]/[project]/plans/[date]-[task-slug].md` and index it
+6. **Draft the full plan in chat and refine it in a loop**, make changes until you approve; nothing is written to disk yet
+7. Only on approval ("save" / "looks good" / `/gg`), write the plan to `~/GRIMOIRE/docs/[group]/[project]/plans/[date]-[task-slug].md` and index it
 
-Do not write any application code. Knowledge files (ADRs, context) may be created during the interview. Stop at the plan and wait for approval.
+Do not write any application code. Knowledge files (ADRs, context) may be created during the interview. The plan file itself is written only after you approve the draft.

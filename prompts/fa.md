@@ -1,5 +1,5 @@
 ---
-description: Fast answer — max speed, no code, no file changes
+description: Fast answer, max speed, no code, no file changes
 ---
 $ARGUMENTS
 

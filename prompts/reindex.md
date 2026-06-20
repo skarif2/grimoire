@@ -1,5 +1,5 @@
 ---
-description: Reindex — rebuild the context-mode FTS5 index from all GRIMOIRE docs
+description: Reindex, rebuild the context-mode FTS5 index from all GRIMOIRE docs
 argument-hint: "[group/project to reindex, or leave blank for all]"
 ---
 $ARGUMENTS
@@ -63,7 +63,7 @@ Work through all files. Skip any that returned empty content.
 
 ## 3. Lint the wiki
 
-Health-check the distilled layer (Karpathy's lint). Run in the sandbox — only the report enters context:
+Health-check the distilled layer (Karpathy's lint). Run in the sandbox, only the report enters context:
 
 ```
 ctx_execute("javascript", `
@@ -90,7 +90,7 @@ ctx_execute("javascript", `
     }
   }
   const orphans = files.filter(f => distilled.includes(path.basename(path.dirname(f))) && !linked.has(path.basename(f, '.md'))).map(f => path.relative(ROOT, f));
-  console.log('LINT — ' + (arg || 'all vault'));
+  console.log('LINT, ' + (arg || 'all vault'));
   console.log('Files: ' + files.length + ' | Orphans (distilled, never linked): ' + orphans.length + ' | Broken links: ' + broken.length + ' | Stale/unverified: ' + stale.length);
   if (orphans.length) console.log('\\nOrphans (add an index/backlink, or remove):\\n' + orphans.join('\\n'));
   if (broken.length) console.log('\\nBroken [[wikilinks]] (target missing):\\n' + broken.slice(0, 40).join('\\n'));
@@ -98,7 +98,7 @@ ctx_execute("javascript", `
 `)
 ```
 
-Surface the lint summary to the user. Orphans and broken links are fixable now (add the missing `index.md` entry / backlink, or correct the link); stale pages are flagged for the user to re-verify. Do not auto-edit pages during reindex — report only.
+Surface the lint summary to the user. Orphans and broken links are fixable now (add the missing `index.md` entry / backlink, or correct the link); stale pages are flagged for the user to re-verify. Do not auto-edit pages during reindex, report only.
 
 ## 4. Report
 

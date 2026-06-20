@@ -1,5 +1,5 @@
 ---
-description: Review — code review for staged, local diff, or GitHub PR
+description: Review, code review for staged, local diff, or GitHub PR
 argument-hint: "[staged | PR number | PR URL]"
 ---
 $ARGUMENTS
