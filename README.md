@@ -22,6 +22,7 @@ GRIMOIRE/
 ├── skills/             ← reusable agent skills (grill-plan, review, improve-architecture, handoff, adversary, lint)
 ├── templates/          ← format templates for index, ADRs, plans, reviews, context, concepts, components, lessons, gotchas, handoffs
 ├── prompts/            ← slash commands (symlinked as commands/ for Claude)
+├── config/             ← saved tool configs (e.g. ccstatusline.json, symlinked into place)
 ├── setup-pi.sh         ← one-time setup for pi
 ├── setup-claude.sh     ← one-time setup for Claude Code
 └── .gitignore
@@ -97,7 +98,38 @@ In pi settings, add to the `packages` list:
 
 #### Claude plugins
 
-_To be documented._
+Claude plugins are installed from a marketplace. Add the marketplace, then install:
+
+```
+/plugin marketplace add mksglu/context-mode
+/plugin install context-mode@context-mode
+```
+
+| Plugin | Marketplace | Purpose |
+|---|---|---|
+| `context-mode` | `mksglu/context-mode` | Context-window protection: sandboxed execution, FTS5 search, web fetch/index |
+
+#### ccstatusline (status line)
+
+[ccstatusline](https://github.com/sirmalloc/ccstatusline) is not a plugin - it's a status-line renderer that runs on demand via `npx`. It's wired into Claude through the `statusLine` block in `~/.claude/settings.json`:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "npx -y ccstatusline@latest",
+  "padding": 0,
+  "refreshInterval": 10
+}
+```
+
+Its own config (line layout, colors, widgets) is version-controlled at `config/ccstatusline.json` and symlinked into place. To restore on a new machine:
+
+```bash
+mkdir -p ~/.config/ccstatusline
+ln -sf ~/GRIMOIRE/config/ccstatusline.json ~/.config/ccstatusline/settings.json
+```
+
+Edits made through ccstatusline's TUI write straight back to the GRIMOIRE copy via the symlink, so the saved config stays current.
 
 ---
 
