@@ -139,9 +139,10 @@ Nothing is written to your config, and it is gone when the session ends.
 claude plugin update grimoire
 claude plugin disable grimoire
 claude plugin uninstall grimoire
+claude plugin marketplace remove skarif2
 ```
 
-Updating needs a restart to take effect. Disabling keeps it installed but dormant, which is the fastest way to tell whether Grimoire is behind some behaviour you did not expect.
+Updating needs a restart to take effect. Disabling keeps it installed but dormant, which is the fastest way to tell whether Grimoire is behind some behaviour you did not expect. The last line drops the catalog itself, which registers under the name `skarif2` rather than the name of the repo.
 
 <br/>
 
