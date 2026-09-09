@@ -211,4 +211,4 @@ Where an idea was worth taking but came wrapped in a fixed sequence of steps or 
 
 ---
 
-Built by [Fazlul Haque Arif](https://github.com/skarif2). MIT licensed.
+Built by [Sk Arif](https://github.com/skarif2). MIT licensed.

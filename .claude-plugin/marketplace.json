@@ -1,12 +1,12 @@
 {
   "name": "grimoire",
   "owner": {
-    "name": "Fazlul Haque Arif",
+    "name": "Sk Arif",
     "url": "https://github.com/skarif2"
   },
   "metadata": {
     "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
-    "version": "0.1.0"
+    "version": "26.910.0"
   },
   "plugins": [
     {
