@@ -138,7 +138,7 @@ Nothing is written to your config, and it is gone when the session ends.
 **A real install, in a sandbox.** `CLAUDE_CONFIG_DIR` gives Claude Code a completely separate profile: its own settings, its own installed plugins, its own history, no contact with your everyday setup.
 
 ```bash
-export CLAUDE_CONFIG_DIR=~/.claude-grimoire
+export CLAUDE_CONFIG_DIR=~/.claude-custom-dir
 
 claude plugin marketplace add skarif2/grimoire
 claude plugin install grimoire
@@ -148,7 +148,7 @@ claude
 This one survives restarts, so you can live with it for a week before deciding. To undo the entire experiment:
 
 ```bash
-rm -rf ~/.claude-grimoire
+rm -rf ~/.claude-custom-dir
 ```
 
 Open a new terminal, or unset the variable, and you are back on your normal setup as though none of it happened.
