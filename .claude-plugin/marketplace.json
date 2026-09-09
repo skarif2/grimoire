@@ -1,12 +1,18 @@
 {
   "name": "grimoire",
-  "owner": { "name": "Fazlul Haque Arif", "url": "https://github.com/skarif2" },
-  "metadata": { "description": "Arif's agent toolkit", "version": "0.1.0" },
+  "owner": {
+    "name": "Fazlul Haque Arif",
+    "url": "https://github.com/skarif2"
+  },
+  "metadata": {
+    "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
+    "version": "0.1.0"
+  },
   "plugins": [
     {
       "name": "grimoire",
       "source": "./claude-kit",
-      "description": "Planning, review, adversarial passes and a wiki that survives worktrees.",
+      "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
       "category": "development"
     }
   ]
