@@ -193,4 +193,22 @@ That is the entire pitch. Your agent should have one.
 
 ---
 
+## Standing on other people's work
+
+Very little here is original. Most of it is an idea someone else had, adapted to fit two folders and a rule against doing anything without asking. Naming names, because vague thanks is worth nothing.
+
+**[mattpocock/skills](https://github.com/mattpocock/skills)** is the largest debt. `/adversary`, `/handoff` and the shape of `/plan` all began there. So did four ideas that changed the design: posting a brief as a ticket comment that supersedes a stale description, treating phases as a dependency graph with a takeable frontier rather than a queue, the fog test that separates a decision from a build step, and `/debug` refusing to form a hypothesis until it has a command that reproduces the bug. `/retro`, and the rule that coding standards belong to the reviewer rather than the implementer, are his too.
+
+**[addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)** taught `/plan` how to interview. Attaching a guess to every question so you react instead of composing, and refusing to accept "sounds good" as approval, both come from there. So does the list of signals that work is too big for one sitting, the habit of watching a diff for a quietly lowered bar, and the change summary section that says what was deliberately left alone.
+
+**[cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack)** gave us `/unslop` almost whole, including the stable rule numbers that let other skills cite a rule instead of restating it. Their comment agent is the ancestor of ours, and its best idea survives intact: when a comment explains a surprise in your own code, do not delete the comment, name the rename or extraction that would make the prose unnecessary. `/bro`, the evidence ladder, and the rule that a judge should run on a different model family than the author are all theirs.
+
+**Andrej Karpathy** for the compiled wiki pattern, the idea that raw notes and distilled pages are different layers and mixing them is what makes a knowledge base rot.
+
+**Martin Fowler**, whose smell catalogue the quality reviewer reads verbatim.
+
+Where an idea was worth taking but came wrapped in a fixed sequence of steps or a mandated folder layout, we took the idea and left the rest. That is a compliment to the thinking, not a criticism of the packaging.
+
+---
+
 Built by [Fazlul Haque Arif](https://github.com/skarif2). MIT licensed.
