@@ -68,7 +68,7 @@ This applies to the fan-out in the next step and equally to your own single-pass
 
 <step-3c-fan-out>
 
-When the host exposes sub-agent dispatch, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "adversary-judge"`, which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
+When the host exposes sub-agent dispatch, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "grimoire:adversary-judge"` (fall back to the bare `adversary-judge` if the host does not namespace agents), which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
 
 Where the harness allows a model to be chosen per dispatch, **the caller should run the judge on a different model family from the parent.** A judge from the same family inherits the parent's blind spots, and agrees for the same reasons the parent was wrong. Where the harness does not allow it, run it anyway and say in the coverage statement that judge and parent share a family.
 

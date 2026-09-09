@@ -60,7 +60,7 @@ After all tasks pass their `verify:`, run one self-review pass on the change bef
 
    Comments, unrequested tests and a quietly lowered bar are the comment police's beat (step 2). Do not re-derive them here.
 
-2. **Call the comment police.** Hand this run's diff, the same one from step 1, to the read-only `comment-police` agent: the Agent tool with `subagent_type: "comment-police"`. It is pinned to Haiku and its tools are read only, so it is cheap and structurally cannot edit. It hunts what a long session erodes: comments against `rules/code.md`, tests nobody asked for, a quietly lowered bar. The agent holds the exact contract, so do not restate it here.
+2. **Call the comment police.** Hand this run's diff, the same one from step 1, to the read-only `comment-police` agent: the Agent tool with `subagent_type: "grimoire:comment-police"` (fall back to the bare `comment-police` if the host does not namespace agents). It is pinned to Haiku and its tools are read only, so it is cheap and structurally cannot edit. It hunts what a long session erodes: comments against `rules/code.md`, tests nobody asked for, a quietly lowered bar. The agent holds the exact contract, so do not restate it here.
 
    It **reports, it never edits**. Merge its findings into step 1's list, same severity tags and same id scheme, deduping anything you already caught. Skip the call on the same trivial diff that skips the whole pass.
 

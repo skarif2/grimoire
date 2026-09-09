@@ -115,7 +115,7 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 Gather findings with the best engine the host supports, and state which path you used in one line at the top of the review.
 
-**Path A, parallel reviewers.** When the host exposes sub-agent dispatch, run the five lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "review-lens"`, one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name and the diff temp file path, plus the changed-file list and the wiki pages loaded above. For the quality lens, also paste the smell baseline below in full, because the agent has no other access to it.
+**Path A, parallel reviewers.** When the host exposes sub-agent dispatch, run the five lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name and the diff temp file path, plus the changed-file list and the wiki pages loaded above. For the quality lens, also paste the smell baseline below in full, because the agent has no other access to it.
 
 - **correctness**: logic errors, null and undefined, race conditions, edge cases
 - **quality**: naming, duplication, complexity, convention compliance, plus the smell baseline below
