@@ -8,7 +8,7 @@ Give it somewhere to remember.
 
 <br/>
 
-[![version](https://img.shields.io/badge/version-26.910.0-6366f1?style=flat-square)](https://github.com/skarif2/GRIMOIRE)
+[![version](https://img.shields.io/badge/version-26.910.0-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
 [![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
 [![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
 [![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
@@ -82,14 +82,14 @@ flowchart LR
 Inside a Claude Code session:
 
 ```bash
-/plugin marketplace add skarif2/GRIMOIRE
+/plugin marketplace add skarif2/grimoire
 /plugin install grimoire
 ```
 
 Or from your shell, without opening a session:
 
 ```bash
-claude plugin marketplace add skarif2/GRIMOIRE
+claude plugin marketplace add skarif2/grimoire
 claude plugin install grimoire
 ```
 
@@ -126,7 +126,7 @@ Skip this step and everything still works, you simply get no wiki. That is a sup
 To load it for one session and leave your setup untouched:
 
 ```bash
-claude --plugin-dir /path/to/GRIMOIRE/claude-kit
+claude --plugin-dir /path/to/grimoire/claude-kit
 ```
 
 Nothing is written to your config, and it is gone when the session ends.
