@@ -1,6 +1,6 @@
 ---
 name: lint
-description: Read-only health check for the toolkit's own files at ~/.claude/kit (rules, skills, commands, templates) and for a project's .wiki/ when one exists. Flags dashes used as punctuation, non-ASCII characters, absolute home-path leaks, broken template references, and for the wiki, missing frontmatter, orphans, dead file:line citations, stale status and duplicate pages. Reports findings with file:line; it never edits. Use after editing skills, commands or wiki pages.
+description: Read-only health check for the toolkit's own files at ${CLAUDE_PLUGIN_ROOT} (rules, skills, commands, templates) and for a project's .wiki/ when one exists. Flags dashes used as punctuation, non-ASCII characters, absolute home-path leaks, broken template references, and for the wiki, missing frontmatter, orphans, dead file:line citations, stale status and duplicate pages. Reports findings with file:line; it never edits. Use after editing skills, commands or wiki pages.
 argument-hint: "[kit | wiki | a path to scope the scan]"
 ---
 
@@ -10,7 +10,7 @@ Read-only lint. It reports problems and recommends fixes; it never applies them,
 
 Two targets, both scanned by default:
 
-**Kit**: `~/.claude/kit/rules/`, and every `*.md` under `~/.claude/kit/skills/`, `~/.claude/kit/commands/`, `~/.claude/kit/templates/`.
+**Kit**: `${CLAUDE_PLUGIN_ROOT}/rules/`, and every `*.md` under `${CLAUDE_PLUGIN_ROOT}/skills/`, `${CLAUDE_PLUGIN_ROOT}/commands/`, `${CLAUDE_PLUGIN_ROOT}/templates/`.
 
 **Wiki**: every `*.md` under `.wiki/` in the current repo, **only when the folder exists**:
 
@@ -27,7 +27,7 @@ If `.wiki/` is absent, scan the kit only and say nothing about the wiki. Never c
 **1. Dashes used as punctuation.** Em dash (U+2014), en dash (U+2013), and a double hyphen that is not a command flag. A style convention that bans all three in prose. Drop this check if it is not yours.
 
 ```bash
-find ~/.claude/kit/ -name '*.md' -print0 | xargs -0 perl -ne \
+find ${CLAUDE_PLUGIN_ROOT}/ -name '*.md' -print0 | xargs -0 perl -ne \
   'BEGIN{$D=chr(45)x2} next if /^\s*-{3,}\s*$/; close ARGV if eof; print "$ARGV:$.: $_" if /\x{2014}|\x{2013}/ || /(?<!\w)$D(?!\w)/ || /(?<=[A-Za-z])$D(?=[A-Za-z])/'
 ```
 
@@ -36,20 +36,20 @@ Flag form (`--verbose`), decrement (`i--`) and a line of only hyphens (YAML fron
 **2. Non-ASCII characters.** Box drawing, arrows, typographic quotes, middots, emoji. Same rule, wider net.
 
 ```bash
-find ~/.claude/kit/ -name '*.md' -print0 | xargs -0 perl -ne 'close ARGV if eof; print "$ARGV:$.: $_" if /[^\x00-\x7F]/'
+find ${CLAUDE_PLUGIN_ROOT}/ -name '*.md' -print0 | xargs -0 perl -ne 'close ARGV if eof; print "$ARGV:$.: $_" if /[^\x00-\x7F]/'
 ```
 
 **3. Absolute home-path leaks.** A hardcoded path under the current home directory that should be `$HOME` or `~`, so the toolkit stays portable across machines.
 
 ```bash
-grep -rnF "$HOME/" --include='*.md' ~/.claude/kit/
+grep -rnF "$HOME/" --include='*.md' ${CLAUDE_PLUGIN_ROOT}/
 ```
 
-**4. Broken template references.** Every `*-FMT` name a skill or command cites must exist in `~/.claude/kit/templates/`.
+**4. Broken template references.** Every `*-FMT` name a skill or command cites must exist in `${CLAUDE_PLUGIN_ROOT}/templates/`.
 
 ```bash
-grep -rnoE '[A-Z][A-Z0-9-]*-FMT' --include='*.md' ~/.claude/kit/ | sort -u
-ls ~/.claude/kit/templates
+grep -rnoE '[A-Z][A-Z0-9-]*-FMT' --include='*.md' ${CLAUDE_PLUGIN_ROOT}/ | sort -u
+ls ${CLAUDE_PLUGIN_ROOT}/templates
 ```
 
 Compare the two lists and report any cited name with no file behind it, at the `file:line` that cites it.

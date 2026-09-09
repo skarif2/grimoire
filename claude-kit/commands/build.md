@@ -75,7 +75,7 @@ After all tasks pass their `verify:`, run one self-review pass on the change bef
 4. **Apply approved fixes.** Minimum change per finding, same discipline as the tasks: touch only what the fix needs, match the surrounding style, remove anything the fix made unused.
 
    **Reach for the strongest mechanism the fix allows**: unrepresentable state beats a lint rule or banned API, which beats a canonical helper, which beats a runtime check.
-   The `retro` skill owns that ladder and the reasoning behind each rung, see `~/.claude/kit/skills/retro/SKILL.md`.
+   The `retro` skill owns that ladder and the reasoning behind each rung, see `${CLAUDE_PLUGIN_ROOT}/skills/retro/SKILL.md`.
 
    Whatever you leave behind becomes the template, since the next writer copies the surrounding code, so a weak guard propagates itself. And when the fix is structural, ship **only** the structural fix: a comment, a doc line or a rule written down telling the next person to remember is the symptom, not the cure, and it does not survive a fresh context. If the strongest mechanism is out of this run's scope (a new lint rule, a schema change), take the strongest one that fits, say so in one line, and record the gap under **Things I did not touch** rather than silently dropping to prose.
 
@@ -90,7 +90,7 @@ After all tasks pass their `verify:`, run one self-review pass on the change bef
 
 Runs once, at ticket close, never mid ticket and never per phase. **Only when `.wiki/` exists.** Check first, and if it does not, skip the whole section without a word.
 
-The finished plan is a raw source. Compile its durable knowledge into the wiki so future work benefits. Load `~/.claude/kit/templates/WIKI-PAGE-FMT.md` before writing any page.
+The finished plan is a raw source. Compile its durable knowledge into the wiki so future work benefits. Load `${CLAUDE_PLUGIN_ROOT}/templates/WIKI-PAGE-FMT.md` before writing any page.
 
 1. Re-read the finished plan **and the actual diff** (the tree versus tree form, see **Propose commit(s), Scope the run's changes**). Identify durable knowledge: a mechanism learned is a **concept**, a module created or heavily touched is a **component**, a non obvious root cause or rejected approach is a **lesson**, a decision with alternatives is an **adr**, a domain term is **context**, a sharp trap is a **gotcha**.
 2. For each, decide **new page versus update existing**. Check `.wiki/{concepts,components,lessons,adr,context,gotchas}/` for a page on the same topic. Never duplicate, revise in place. Create a kind folder lazily, only when writing the first page into it.

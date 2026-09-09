@@ -33,8 +33,8 @@ Read the session first: the transcript, the diff it produced, the plan or review
 
 Targets in this kit, roughly in order of how much they cost to read:
 
-- `~/.claude/kit/rules/` loads on every run. Only durable, short, universal rules. Adding a line here is the most expensive fix available.
-- A skill or command under `~/.claude/kit/` loads only when invoked, and its description is the only part that is always resident. This is where procedures go.
+- `${CLAUDE_PLUGIN_ROOT}/rules/` loads on every run. Only durable, short, universal rules. Adding a line here is the most expensive fix available.
+- A skill or command under `${CLAUDE_PLUGIN_ROOT}/` loads only when invoked, and its description is the only part that is always resident. This is where procedures go.
 - A project's `AGENTS.md` or `CLAUDE.md` loads for every agent in that repo. Treat it as navigation pointers to other files, not as a manual.
 - `.wiki/`, only when the folder exists. Gate on `[ -d .wiki ]`. Absent means the project never opted in, so do not create it, do not write to it, and do not remark on its absence. Present means durable per-project knowledge belongs there, one page per idea, reached from the pointers above.
 

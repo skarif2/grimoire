@@ -174,7 +174,7 @@ Label every Critical and Major finding `evidence: 2` and so on, and label the ve
 
 ## Output
 
-Load `~/.claude/kit/templates/REVIEW-FMT.md` for the format. Adapt depth to diff size. Sections in short:
+Load `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for the format. Adapt depth to diff size. Sections in short:
 
 Title, then **Mode**, **Date**, **Files changed**, **CI** (passing, failing, pending, not applicable). Then Summary, Risks (each with severity, `file:line` and its evidence level, flagging the escalated ones), Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Keep the Risks grouped by lens so the no-rerank rule survives into the file.
 
@@ -246,7 +246,7 @@ Only when `.wiki/` exists. If it does not, stop after the messages above and do 
 
 A review is a raw source. Its lasting value, not the per-line nits, compounds into the wiki. Most useful in pr and local mode, usually skip for staged.
 
-`/build`'s deferred distillation owns the flow: folder choice, new versus update, the confirm batch, and never writing before approval. Page format and frontmatter live in `~/.claude/kit/templates/WIKI-PAGE-FMT.md`. Only the review specific parts are here.
+`/build`'s deferred distillation owns the flow: folder choice, new versus update, the confirm batch, and never writing before approval. Page format and frontmatter live in `${CLAUDE_PLUGIN_ROOT}/templates/WIKI-PAGE-FMT.md`. Only the review specific parts are here.
 
 - Pick durable items out of the **findings and the diff** only: a recurring trap is a gotcha, a non-obvious behaviour of a module is a component page, a root cause or pattern worth remembering is a lesson or a concept. Per-PR nitpicks never qualify.
 - `source` names this review, the branch or the PR as plain text plus durable anchors (`path:line`, PR, commit), never a link, because `.grimoire/review.md` is overwritten every run.

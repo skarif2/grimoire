@@ -34,7 +34,7 @@ So this skill should not fire most of the time. When it was invoked and question
 
 `.grimoire/handoffs/handoff_{YYYY-MM-DD}-{slug}.md`, in the current worktree. `.grimoire/` is gitignored and per worktree, so a handoff captured while working one ticket stays with that worktree.
 
-Load `~/.claude/kit/templates/HANDOFF-FMT.md` and follow it exactly before writing anything.
+Load `${CLAUDE_PLUGIN_ROOT}/templates/HANDOFF-FMT.md` and follow it exactly before writing anything.
 
 ```bash
 SLUG=$(echo "[short title]" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g' | cut -c1-40)

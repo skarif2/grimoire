@@ -131,7 +131,7 @@ Only offer one when ALL THREE hold:
 2. **Surprising without context**, a future reader would wonder why
 3. **Real trade-off**, genuine alternatives were considered and rejected
 
-If `.wiki/` exists and the user agrees, load `~/.claude/kit/templates/WIKI-PAGE-FMT.md` and write `.wiki/adr/adr_[slug].md` with the mandatory frontmatter (`summary`, `status`, `updated`, `source`) and the ADR body. `source` names this plan in plain text, never as a link. Link out to related pages so it is not an orphan. The `summary` line is how future sessions find it.
+If `.wiki/` exists and the user agrees, load `${CLAUDE_PLUGIN_ROOT}/templates/WIKI-PAGE-FMT.md` and write `.wiki/adr/adr_[slug].md` with the mandatory frontmatter (`summary`, `status`, `updated`, `source`) and the ADR body. `source` names this plan in plain text, never as a link. Link out to related pages so it is not an orphan. The `summary` line is how future sessions find it.
 
 Most ADRs are short. Add "Alternatives rejected" and "Consequences" only where they carry real weight.
 
@@ -149,7 +149,7 @@ Only terms specific to this project, never general programming concepts. Without
 
 When the interview has surfaced enough, **do not write the plan file yet.** Present the full plan as a **draft in chat** and refine it with the user in a loop. The file is created only on approval, so changes stay cheap and nothing hits disk prematurely.
 
-1. Load `~/.claude/kit/templates/PLAN-FMT.md` for the format. Render the **complete** plan inline using that structure: Title, Goal, Context, Tasks (each with a `verify:`), Decisions, Out of scope. Label it clearly, a leading line `Draft plan, not saved yet`. Keep it tight per PLAN-FMT (one sentence goal, three to five context bullets) so the whole draft fits the terminal at a glance. On later edits re-render only the changed sections, so the loop stays scannable.
+1. Load `${CLAUDE_PLUGIN_ROOT}/templates/PLAN-FMT.md` for the format. Render the **complete** plan inline using that structure: Title, Goal, Context, Tasks (each with a `verify:`), Decisions, Out of scope. Label it clearly, a leading line `Draft plan, not saved yet`. Keep it tight per PLAN-FMT (one sentence goal, three to five context bullets) so the whole draft fits the terminal at a glance. On later edits re-render only the changed sections, so the loop stays scannable.
 
    When `.wiki/` exists, reference the pages the interview relied on by `[[slug]]` in Context, so the trail is explicit.
 
@@ -196,7 +196,7 @@ Do not write the plan file during this loop. ADRs and context pages from Steps 5
 
 <output>
 
-Only after the user approves the draft, load `~/.claude/kit/templates/PLAN-FMT.md` and write the plan to `.grimoire/plan.md` at the repo root.
+Only after the user approves the draft, load `${CLAUDE_PLUGIN_ROOT}/templates/PLAN-FMT.md` and write the plan to `.grimoire/plan.md` at the repo root.
 
 There is one active plan per worktree, so there is no dated filename and no dedup. If an unfinished plan is already there, ask before overwriting:
 
