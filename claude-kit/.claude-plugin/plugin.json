@@ -1,0 +1,10 @@
+{
+  "name": "grimoire",
+  "version": "0.1.0",
+  "description": "A knowledge and workflow toolkit. Two folders at the repo root: .grimoire for the current ticket, .wiki for what the project has learned. Plans, reviews, adversarial passes, and a wiki that survives worktrees.",
+  "author": { "name": "Fazlul Haque Arif", "url": "https://github.com/skarif2" },
+  "homepage": "https://github.com/skarif2/GRIMOIRE",
+  "repository": "https://github.com/skarif2/GRIMOIRE",
+  "license": "MIT",
+  "keywords": ["planning", "code-review", "knowledge-base", "worktree", "wiki"]
+}

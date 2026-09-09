@@ -1,0 +1,13 @@
+{
+  "name": "grimoire",
+  "owner": { "name": "Fazlul Haque Arif", "url": "https://github.com/skarif2" },
+  "metadata": { "description": "Arif's agent toolkit", "version": "0.1.0" },
+  "plugins": [
+    {
+      "name": "grimoire",
+      "source": "./claude-kit",
+      "description": "Planning, review, adversarial passes and a wiki that survives worktrees.",
+      "category": "development"
+    }
+  ]
+}
