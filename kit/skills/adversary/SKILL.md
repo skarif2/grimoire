@@ -17,7 +17,7 @@ The target is polymorphic. One target per invocation. Classify `$ARGUMENTS`:
 - **`staged`**: the staged diff, `git diff --staged -U3 . ':(exclude)*lock.json' ':(exclude)dist/*' ':(exclude)build/*'`
 - **`local`**, or no argument on a dirty or ahead branch: the branch diff against its base, `git diff origin/<base>...HEAD -U3`. Detect the base the way `/review` does.
 - **a PR number or GitHub URL**: `gh pr diff <number>` for the diff and `gh pr view <number> --json title,body` for the stated goal. If `gh` is unavailable, say "PR targets need `gh` or a token; pass a file, diff, or text target instead" and stop.
-- **`plan`, or a path to a plan file**: read `.desk/plan.md`, the one active plan for this worktree, or the explicit path if one was given.
+- **`plan`, or a path to a plan file**: read `.grimoire/plan.md`, the one active plan for this worktree, or the explicit path if one was given.
 - **any other file path**: read that file.
 - **inline text**: attack the text as given.
 - **empty with nothing to diff**: ask what to attack. There is no useful default.

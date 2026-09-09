@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Reads the branch's ticket when there is one, drafts the plan in chat and refines it in a loop until you approve, then writes .desk/plan.md (and optionally an ADR, plus a ticket brief to post). Stays in refinement mode for further tweaks. Use with /plan to stress-test an idea.
+description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Reads the branch's ticket when there is one, drafts the plan in chat and refines it in a loop until you approve, then writes .grimoire/plan.md (and optionally an ADR, plus a ticket brief to post). Stays in refinement mode for further tweaks. Use with /plan to stress-test an idea.
 argument-hint: "<task description>"
 ---
 
@@ -24,7 +24,7 @@ Build understanding silently. Do not dump file contents at the user, surface onl
 
 Before asking anything, load what is already known.
 
-1. **Handoffs.** `ls .desk/handoffs/*.md 2>/dev/null`. If a filename looks related to the task, ask before loading:
+1. **Handoffs.** `ls .grimoire/handoffs/*.md 2>/dev/null`. If a filename looks related to the task, ask before loading:
    > "Found a handoff that might be related: `[filename]`. Load it as context for this plan?"
 
    Only load on confirmation, never silently, even if the user mentioned the handoff in their request. If loaded, remember its path for cleanup at the end. If nothing matches, skip.
@@ -196,14 +196,14 @@ Do not write the plan file during this loop. ADRs and context pages from Steps 5
 
 <output>
 
-Only after the user approves the draft, load `~/.claude/kit/templates/PLAN-FMT.md` and write the plan to `.desk/plan.md` at the repo root.
+Only after the user approves the draft, load `~/.claude/kit/templates/PLAN-FMT.md` and write the plan to `.grimoire/plan.md` at the repo root.
 
 There is one active plan per worktree, so there is no dated filename and no dedup. If an unfinished plan is already there, ask before overwriting:
 
 ```bash
-mkdir -p .desk
-if [ -f .desk/plan.md ] && grep -q '^\*\*Status:\*\* In Progress' .desk/plan.md 2>/dev/null; then
-  echo "An active plan already exists at .desk/plan.md; overwrite it?"
+mkdir -p .grimoire
+if [ -f .grimoire/plan.md ] && grep -q '^\*\*Status:\*\* In Progress' .grimoire/plan.md 2>/dev/null; then
+  echo "An active plan already exists at .grimoire/plan.md; overwrite it?"
 fi
 ```
 
@@ -211,7 +211,7 @@ Write the file to PLAN-FMT exactly: its section order, its field names, its phas
 
 Tell the user the plan path and any wiki pages created. If `<ticket-context>` found a ticket, draft the brief now, see `<ticket-brief>`. Then present the post-save choice:
 
-> Plan saved at `.desk/plan.md` (you can `@.desk/plan.md` it).
+> Plan saved at `.grimoire/plan.md` (you can `@.grimoire/plan.md` it).
 > - **build**: execute the plan now (runs `/build`)
 > - **done**: stop here, the plan is saved to run later
 >
@@ -261,12 +261,12 @@ The description above is context. This comment is the contract.
 - the adjacent thing that looks related and is not
 ```
 
-Same source as the plan, different reader. The plan carries `verify:` steps for whoever executes it, the brief carries a contract for whoever opens the ticket. Do not paste the plan in, and do not reference `.desk/plan.md`, which the ticket's reader cannot see.
+Same source as the plan, different reader. The plan carries `verify:` steps for whoever executes it, the brief carries a contract for whoever opens the ticket. Do not paste the plan in, and do not reference `.grimoire/plan.md`, which the ticket's reader cannot see.
 
-Write it to `.desk/brief.md`, show it in chat, and hand over the command:
+Write it to `.grimoire/brief.md`, show it in chat, and hand over the command:
 
 ```bash
-gh issue comment <id> --repo <owner/repo> --body-file .desk/brief.md
+gh issue comment <id> --repo <owner/repo> --body-file .grimoire/brief.md
 ```
 
 **Never run it.** Posting to a ticket is the user's, exactly like committing. Offer once, and drop it without comment if the user is not interested.
@@ -277,7 +277,7 @@ gh issue comment <id> --repo <owner/repo> --body-file .desk/brief.md
 
 After the plan file is written, the conversation enters **refinement mode**. The file is now the working document, keep it the source of truth so it never drifts from what was actually decided.
 
-- When the user refines scope, approach, tasks or decisions, edit `.desk/plan.md` directly with `Edit`, do not just discuss the change in chat. Confirm in one line what changed, "Updated, added a task for the migration step".
+- When the user refines scope, approach, tasks or decisions, edit `.grimoire/plan.md` directly with `Edit`, do not just discuss the change in chat. Confirm in one line what changed, "Updated, added a task for the migration step".
 - Use judgment. Edit the file when the user is changing the plan, just answer when the user is only asking about it. Not every message is a plan edit.
 - Every task keeps its `verify:`. A refinement that adds a task adds a `verify:` too.
 

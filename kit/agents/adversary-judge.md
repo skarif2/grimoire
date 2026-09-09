@@ -55,7 +55,7 @@ In conversation. You write no file.
 ```
 Class: contract misread
 Severity: critical   Confidence: high
-Where: .desk/plan.md task 3, and src/import/run.ts:44
+Where: .grimoire/plan.md task 3, and src/import/run.ts:44
 Failure scenario:
   <the concrete sequence in which this fails, with the actual input>
 Refutation attempted:

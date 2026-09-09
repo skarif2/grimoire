@@ -1,24 +1,24 @@
 ---
 description: "Plan approved: execute it, self-review the change, distil into the wiki, then draft the PR"
-argument-hint: "(no arguments, the active plan is .desk/plan.md)"
+argument-hint: "(no arguments, the active plan is .grimoire/plan.md)"
 ---
 
 Plan approved. Execute now.
 
 ## Instructions
 
-1. Locate the plan. There is **one active plan per repo or worktree**, the single file `.desk/plan.md`. No partial name matching, and `/build` takes no arguments. Then **ensure `.desk/` is excluded from git**, idempotently: only `/wiki-init` writes that exclude line and the wiki is opt in, so on a project that never ran it the plan file would otherwise land in the baseline snapshot and in every `git add`.
+1. Locate the plan. There is **one active plan per repo or worktree**, the single file `.grimoire/plan.md`. No partial name matching, and `/build` takes no arguments. Then **ensure `.grimoire/` is excluded from git**, idempotently: only `/wiki-init` writes that exclude line and the wiki is opt in, so on a project that never ran it the plan file would otherwise land in the baseline snapshot and in every `git add`.
    ```bash
-   PLAN_FILE=".desk/plan.md"
-   PR_FILE=".desk/pr.md"
+   PLAN_FILE=".grimoire/plan.md"
+   PR_FILE=".grimoire/pr.md"
    [ -f "$PLAN_FILE" ] || echo "No active plan at $PLAN_FILE, run /plan first."   # then stop
    EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
-   grep -qxF '.desk' "$EXCLUDE" 2>/dev/null || printf '.desk\n' >> "$EXCLUDE"
+   grep -qxF '.grimoire' "$EXCLUDE" 2>/dev/null || printf '.grimoire\n' >> "$EXCLUDE"
    ```
 2. Read the plan file with Read, since we edit it later. If its Context section names wiki pages and `.wiki/` exists, read those pages too.
 
    **Detect phased vs single phase (structural, not a keyword).** If the plan contains a literal `## Phases` section, it is **phased**: follow the **Phased execution** section below instead of steps 3 to 7, then stop. A plan that merely mentions "phase" in prose is *not* phased. With no `## Phases` section, the plan is single phase, continue with steps 3 to 7.
-3. Add all tasks to the todo overlay. Then capture a **start of run baseline** before editing anything, using the same non mutating snapshot mechanism as a phase baseline (see **Phased execution, 2. Set the phase baseline**), under the ref `refs/desk/baseline/<plan-slug>-run`. This scopes the run's commit proposal later. Non mutating, so the user's index and the manual git invariant are untouched.
+3. Add all tasks to the todo overlay. Then capture a **start of run baseline** before editing anything, using the same non mutating snapshot mechanism as a phase baseline (see **Phased execution, 2. Set the phase baseline**), under the ref `refs/grimoire/baseline/<plan-slug>-run`. This scopes the run's commit proposal later. Non mutating, so the user's index and the manual git invariant are untouched.
 4. Execute each task one by one. After completing each task:
    - **Before writing code against a third party library or framework whose current API matters** (a recent version, an unfamiliar call), optionally ground it in current docs via context7 (`resolve-library-id` then `get-library-docs`) to avoid hallucinated or outdated signatures. Pull only the topic you need. Skip for std lib or stable code.
    - Run the task's `verify:` condition to confirm it actually worked
@@ -28,13 +28,13 @@ Plan approved. Execute now.
 5. **Self-review the change (reflect).** Before wrapping up, review your own work once across the same lenses as `/review`, so structural and convention issues get caught here, not by you later. Scope the review to this run's changes via the tree versus tree form against the `-run` baseline (see **Propose commit(s), Scope the run's changes**), so pre-existing dirt and unrelated edits stay out. Adapt depth to the diff: skip for a trivial one file change, run it for anything non trivial. See **Self-review (reflect)** below.
 6. When all tasks are complete and the self-review is resolved, first **propose commit(s) for this run** (scope to the `-run` baseline ref, see **Propose commit(s)**, propose only). Then update plan `**Status:** Done`, clean up the run baseline ref, and **prune the plan file** (full prune, no archive, its durable value goes into the wiki in step 7):
 
-   **Before pruning, read the plan's `**Companion:**` line.** When it names a sibling repo's `.desk/plan.md`, that ticket has a second half in another repository, and pruning this plan is the last moment anyone is looking. Print the companion path and say plainly whether the other half is still outstanding. Do not go read it, and do not act on it.
+   **Before pruning, read the plan's `**Companion:**` line.** When it names a sibling repo's `.grimoire/plan.md`, that ticket has a second half in another repository, and pruning this plan is the last moment anyone is looking. Print the companion path and say plainly whether the other half is still outstanding. Do not go read it, and do not act on it.
 
    ```bash
    # Stable slug from the plan title (plan.md's basename is not unique across worktrees sharing one .git)
    PLAN_SLUG=$(grep -m1 '^# ' "$PLAN_FILE" | sed 's/^# *//;s/[^A-Za-z0-9 -]//g' | tr '[:upper:] ' '[:lower:]-' | tr -s '-' | cut -c1-40 | sed 's/^-*//;s/-*$//')
    [ -z "$PLAN_SLUG" ] && PLAN_SLUG="plan"
-   for ref in $(git for-each-ref --format='%(refname)' "refs/desk/baseline/${PLAN_SLUG}-*"); do
+   for ref in $(git for-each-ref --format='%(refname)' "refs/grimoire/baseline/${PLAN_SLUG}-*"); do
      git update-ref -d "$ref"
    done
    rm -f "$PLAN_FILE"   # prune on Done
@@ -94,7 +94,7 @@ The finished plan is a raw source. Compile its durable knowledge into the wiki s
 
 1. Re-read the finished plan **and the actual diff** (the tree versus tree form, see **Propose commit(s), Scope the run's changes**). Identify durable knowledge: a mechanism learned is a **concept**, a module created or heavily touched is a **component**, a non obvious root cause or rejected approach is a **lesson**, a decision with alternatives is an **adr**, a domain term is **context**, a sharp trap is a **gotcha**.
 2. For each, decide **new page versus update existing**. Check `.wiki/{concepts,components,lessons,adr,context,gotchas}/` for a page on the same topic. Never duplicate, revise in place. Create a kind folder lazily, only when writing the first page into it.
-3. Draft each page at the matching folder (`concepts/`, `components/`, `lessons/`, `adr/`, `context/`, `gotchas/`) as `{kind}_{slug}.md` with the mandatory frontmatter: `summary` (one line under 120 characters, it carries the payload, this is what a session greps), `status` (`current`, `needs-verification` or `stale`), `updated`, and `source`. `source` **names** the originating plan, branch or task as plain text plus durable anchors (`path:line`, PR, commit). Never `[[link]]` the plan: it lives in `.desk/`, is gitignored and gets pruned on Done, so the link would dangle. Link related pages with `[[slug]]`, and draft the backlinks on the pages you point at, since a page with no inbound and no outbound link is an orphan. One trap per gotcha file.
+3. Draft each page at the matching folder (`concepts/`, `components/`, `lessons/`, `adr/`, `context/`, `gotchas/`) as `{kind}_{slug}.md` with the mandatory frontmatter: `summary` (one line under 120 characters, it carries the payload, this is what a session greps), `status` (`current`, `needs-verification` or `stale`), `updated`, and `source`. `source` **names** the originating plan, branch or task as plain text plus durable anchors (`path:line`, PR, commit). Never `[[link]]` the plan: it lives in `.grimoire/`, is gitignored and gets pruned on Done, so the link would dangle. Link related pages with `[[slug]]`, and draft the backlinks on the pages you point at, since a page with no inbound and no outbound link is an orphan. One trap per gotcha file.
 4. **Present the drafts as a confirm batch**, each proposed page listed NEW or UPDATE with a one line summary. Do **not** write until the user approves. On `approve`: write the pages. On `revise: <note>`: adjust and re-present.
 5. If the change produced nothing durable (a trivial fix), **say so and skip**, never manufacture pages.
 6. After the pages are written, **propose the final doc-commit** covering the wiki changes, see **Propose commit(s), Final doc-commit**.
@@ -121,9 +121,9 @@ These are prose other people read, so both prose skills apply: the `voice` skill
    ## Why
    ## How to test
    ```
-4. **Write it.** Write the filled draft to `.desk/pr.md`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Open it:
+4. **Write it.** Write the filled draft to `.grimoire/pr.md`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Open it:
    ```bash
-   mkdir -p .desk
+   mkdir -p .grimoire
    code "$(pwd)" "$PR_FILE" 2>/dev/null || echo "  saved: $PR_FILE"
    ```
 
@@ -188,7 +188,7 @@ git diff "$BASE" "$CUR" [-- <file>]              # the run's patch (whole run, o
 
 ### Build the proposal
 
-1. **Files.** Take the run's changed file list above. `.desk` is added to the git common dir's `info/exclude` in step 1, when the plan is located, and `/wiki-init` adds `.wiki` when a project opts into one. With that exclusion in place the plan file never appears in the tree versus tree diff or any `git add`. If step 1's guard did not run (an ad hoc invocation), apply it before snapshotting.
+1. **Files.** Take the run's changed file list above. `.grimoire` is added to the git common dir's `info/exclude` in step 1, when the plan is located, and `/wiki-init` adds `.wiki` when a project opts into one. With that exclusion in place the plan file never appears in the tree versus tree diff or any `git add`. If step 1's guard did not run (an ad hoc invocation), apply it before snapshotting.
 2. **Subject.** Infer the subject style from recent history (`git log --oneline -10`). If there is no history yet, fall back to a plain imperative subject (for example `Add <thing>`). Keep it short. The repo's existing convention wins on **structure** (a `feat(scope):` prefix stays a `feat(scope):` prefix), `voice` governs the **wording** after it and the `unslop` skill applies to it too.
 3. **Body.** Draw the why from the phase's `Notes:` (phased) or the plan `Goal:` (single phase), plus what changed. **Write the body through the `voice` skill and apply the `unslop` skill**, it is prose other people read.
 4. **Commands.** Emit copy pasteable commands for the user to run or edit, do not run them:
@@ -207,7 +207,7 @@ Default to **one** commit per run. When the run's changes fall into clearly sepa
 
 ### Final doc-commit (after distillation)
 
-Only when `.wiki/` exists and distillation actually wrote pages. The per run proposal covers code and work only. `.wiki/` is its own checkout on the orphan `wiki` branch, so the doc-commit runs there, separate from the feature branch. The pruned plan was in `.desk/`, excluded from git, so it never enters this commit and there is no rename to stage:
+Only when `.wiki/` exists and distillation actually wrote pages. The per run proposal covers code and work only. `.wiki/` is its own checkout on the orphan `wiki` branch, so the doc-commit runs there, separate from the feature branch. The pruned plan was in `.grimoire/`, excluded from git, so it never enters this commit and there is no rename to stage:
 
 ```bash
 git -C .wiki add <written pages: concepts/..., gotchas/...>
@@ -248,12 +248,12 @@ rm -f "$SCRATCH"
 PLAN_SLUG=$(grep -m1 '^# ' "$PLAN_FILE" | sed 's/^# *//;s/[^A-Za-z0-9 -]//g' | tr '[:upper:] ' '[:lower:]-' | tr -s '-' | cut -c1-40 | sed 's/^-*//;s/-*$//')
 [ -z "$PLAN_SLUG" ] && PLAN_SLUG="plan"
 PHASE_ID=<the chosen phase's Id, e.g. import-csv-endpoint>
-git update-ref "refs/desk/baseline/${PLAN_SLUG}-${PHASE_ID}" "$TREE"
+git update-ref "refs/grimoire/baseline/${PLAN_SLUG}-${PHASE_ID}" "$TREE"
 ```
 
-Use the **chosen phase's own id** for `${PHASE_ID}` so each phase gets a distinct ref. A shared literal would make every phase overwrite the same ref and break per phase and cumulative diffs, and a positional number would break the moment phases are reordered or one is inserted. Record `refs/desk/baseline/${PLAN_SLUG}-${PHASE_ID}` as that phase's `**Baseline:**` in the plan file. This never stages anything in the user's index and respects the manual git invariant. If the phase already has a `Baseline` (a resumed phase), reuse it, do not re-snapshot.
+Use the **chosen phase's own id** for `${PHASE_ID}` so each phase gets a distinct ref. A shared literal would make every phase overwrite the same ref and break per phase and cumulative diffs, and a positional number would break the moment phases are reordered or one is inserted. Record `refs/grimoire/baseline/${PLAN_SLUG}-${PHASE_ID}` as that phase's `**Baseline:**` in the plan file. This never stages anything in the user's index and respects the manual git invariant. If the phase already has a `Baseline` (a resumed phase), reuse it, do not re-snapshot.
 
-**Record the ticket baseline once.** The plan carries a plan level `**Ticket baseline:**` line next to `**Status:**` (`templates/PLAN-FMT.md` carries the field). If it is still empty, this is the **first** phase of the ticket to run: write the ref you just created into it with Edit. If it already holds a ref, leave it alone, never overwrite. A plan authored before the field simply gets the line added. This is the only record of which phase ran first, so it has to be written when it happens: a ref pointing at a tree has no `%(creatordate)`, and `refs/desk/*` gets no reflog either, since `core.logAllRefUpdates` covers only heads, remotes, notes and `HEAD`. Ref order is not recoverable after the fact.
+**Record the ticket baseline once.** The plan carries a plan level `**Ticket baseline:**` line next to `**Status:**` (`templates/PLAN-FMT.md` carries the field). If it is still empty, this is the **first** phase of the ticket to run: write the ref you just created into it with Edit. If it already holds a ref, leave it alone, never overwrite. A plan authored before the field simply gets the line added. This is the only record of which phase ran first, so it has to be written when it happens: a ref pointing at a tree has no `%(creatordate)`, and `refs/grimoire/*` gets no reflog either, since `core.logAllRefUpdates` covers only heads, remotes, notes and `HEAD`. Ref order is not recoverable after the fact.
 
 - That phase's diff and the cumulative diff are taken **tree versus tree** (snapshot the current tree, then `git diff <baseline-tree> <current-tree>`) so files the run created are included, see **Propose commit(s), Scope the run's changes**. A bare `git diff <baseline ref>` omits untracked files. The phase diff uses its own baseline ref. The cumulative diff uses the ref read back from the plan's `**Ticket baseline:**` line, which is the baseline of the phase that ran **first**, not the first phase in file order, since the frontier may have been taken out of order.
 
@@ -288,13 +288,13 @@ If phases still remain, do **not** continue into the next phase and do **not** d
 Reached only when step 1 found all phases `done`. Gate both steps on **every** phase being `done`, not on file order or position.
 
 1. **Distil from the cumulative diff plus per phase notes.** Intermediate phases skip distillation entirely, it runs once here, and only when `.wiki/` exists. Distil the whole ticket from the cumulative diff (the **tree versus tree** form against the ref in the plan's `**Ticket baseline:**` line, the baseline of the phase that ran first, so new files are included, see **Propose commit(s), Scope the run's changes**) **and** every phase's `**Notes:**`, so a fresh session that never saw the earlier phases recovers both *what* changed and *why*. Follow the same draft, then confirm flow as **Deferred distillation** above. If the plan carries no `**Ticket baseline:**` (authored before the field, or every phase was already done before this mechanism existed), say so and ask the user which phase ran first, listing the phase `**Baseline:**` refs. Do not guess the order from the refs, it is not stored there.
-2. **Prune the plan and clean up baseline refs.** Set the plan `**Status:** Done`, remove this plan's baseline refs, **Before pruning, read the plan's `**Companion:**` line.** When it names a sibling repo's `.desk/plan.md`, that ticket has a second half in another repository, and pruning this plan is the last moment anyone is looking. Print the companion path and say plainly whether the other half is still outstanding. Do not go read it, and do not act on it.
+2. **Prune the plan and clean up baseline refs.** Set the plan `**Status:** Done`, remove this plan's baseline refs, **Before pruning, read the plan's `**Companion:**` line.** When it names a sibling repo's `.grimoire/plan.md`, that ticket has a second half in another repository, and pruning this plan is the last moment anyone is looking. Print the companion path and say plainly whether the other half is still outstanding. Do not go read it, and do not act on it.
 
    Then **prune the plan file** (full prune, no archive). Re-derive `PLAN_SLUG` here, since a fresh all done session never ran section 2, and grep the title *before* pruning:
    ```bash
    PLAN_SLUG=$(grep -m1 '^# ' "$PLAN_FILE" | sed 's/^# *//;s/[^A-Za-z0-9 -]//g' | tr '[:upper:] ' '[:lower:]-' | tr -s '-' | cut -c1-40 | sed 's/^-*//;s/-*$//')
    [ -z "$PLAN_SLUG" ] && PLAN_SLUG="plan"
-   for ref in $(git for-each-ref --format='%(refname)' "refs/desk/baseline/${PLAN_SLUG}-*"); do
+   for ref in $(git for-each-ref --format='%(refname)' "refs/grimoire/baseline/${PLAN_SLUG}-*"); do
      git update-ref -d "$ref"
    done
    rm -f "$PLAN_FILE"   # prune on Done

@@ -1,6 +1,6 @@
 # Plan Format
 
-The plan is a single working file at `.desk/plan.md`, gitignored and per worktree. There is one active plan per worktree, so there is no dated filename and no dedup. Create `.desk/` lazily, only when the first plan is written.
+The plan is a single working file at `.grimoire/plan.md`, gitignored and per worktree. There is one active plan per worktree, so there is no dated filename and no dedup. Create `.grimoire/` lazily, only when the first plan is written.
 
 `/build` prunes the plan on Done. Anything worth keeping is carried into `.wiki/` by distillation, not by keeping the plan file around.
 
@@ -39,8 +39,8 @@ The plan is a single working file at `.desk/plan.md`, gitignored and per worktre
 
 Plan level fields:
 
-- **Ticket baseline:** empty at authoring. `/build` fills it with the first phase's baseline ref name and reads it back to diff the whole ticket, since tree refs carry no creation date and `refs/desk/*` has no reflog to recover an ordering from.
-- **Companion:** optional, the path to a sibling repo's `.desk/plan.md` when one ticket spans two repositories. `.desk/` is per worktree, so neither half sees the other; `/build` prints this path at Done so the other half is not forgotten. Leave it empty otherwise.
+- **Ticket baseline:** empty at authoring. `/build` fills it with the first phase's baseline ref name and reads it back to diff the whole ticket, since tree refs carry no creation date and `refs/grimoire/*` has no reflog to recover an ordering from.
+- **Companion:** optional, the path to a sibling repo's `.grimoire/plan.md` when one ticket spans two repositories. `.grimoire/` is per worktree, so neither half sees the other; `/build` prints this path at Done so the other half is not forgotten. Leave it empty otherwise.
 
 ## Phased plans
 
@@ -121,8 +121,8 @@ When even a single batch cannot stay green alone, keep the sequence and add a fi
 
 A plan is a raw source, so it never becomes a wiki page. It is the primary input to distillation.
 
-When `.wiki/` exists, reference the pages the interview relied on by `[[slug]]` in Context, so the trail is explicit. At close, `/build` distils the plan into wiki pages that name this plan as `source` in plain text, never as a link, because `.desk/plan.md` is pruned on Done.
+When `.wiki/` exists, reference the pages the interview relied on by `[[slug]]` in Context, so the trail is explicit. At close, `/build` distils the plan into wiki pages that name this plan as `source` in plain text, never as a link, because `.grimoire/plan.md` is pruned on Done.
 
 When `.wiki/` does not exist, the plan is the only record. Say nothing about distillation.
 
-Because `/build` prunes `plan.md` on Done unconditionally, that record dies with it, taking `## Decisions`, `## Out of scope` and every phase `Notes:` along. So when `.wiki/` does not exist, carry `## Decisions` and `## Out of scope` into `.desk/pr.md` before the plan is pruned. That file survives, and the PR body built from it becomes the durable record.
+Because `/build` prunes `plan.md` on Done unconditionally, that record dies with it, taking `## Decisions`, `## Out of scope` and every phase `Notes:` along. So when `.wiki/` does not exist, carry `## Decisions` and `## Out of scope` into `.grimoire/pr.md` before the plan is pruned. That file survives, and the PR body built from it becomes the durable record.

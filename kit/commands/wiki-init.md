@@ -21,7 +21,7 @@ if [ ! -e "$WIKI_HOME" ]; then
   git -C "$WIKI_HOME" commit --allow-empty -m "wiki: init"
 fi
 
-grep -qxF '.desk' "$COMMON/info/exclude" 2>/dev/null || printf '.desk\n' >> "$COMMON/info/exclude"
+grep -qxF '.grimoire' "$COMMON/info/exclude" 2>/dev/null || printf '.grimoire\n' >> "$COMMON/info/exclude"
 grep -qxF '.wiki' "$COMMON/info/exclude" 2>/dev/null || printf '.wiki\n' >> "$COMMON/info/exclude"
 
 git worktree list --porcelain | sed -n 's/^worktree //p' | while read -r WT; do

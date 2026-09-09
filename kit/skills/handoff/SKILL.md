@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Capture a new idea or task that emerged mid-conversation and package it for a fresh session to pick up. Writes to .desk/handoffs/ in the current worktree. Use when you discover something worth doing separately rather than now.
+description: Capture a new idea or task that emerged mid-conversation and package it for a fresh session to pick up. Writes to .grimoire/handoffs/ in the current worktree. Use when you discover something worth doing separately rather than now.
 argument-hint: "[the new idea or task to hand off]"
 ---
 
@@ -32,19 +32,19 @@ So this skill should not fire most of the time. When it was invoked and question
 
 <where-it-goes>
 
-`.desk/handoffs/handoff_{YYYY-MM-DD}-{slug}.md`, in the current worktree. `.desk/` is gitignored and per worktree, so a handoff captured while working one ticket stays with that worktree.
+`.grimoire/handoffs/handoff_{YYYY-MM-DD}-{slug}.md`, in the current worktree. `.grimoire/` is gitignored and per worktree, so a handoff captured while working one ticket stays with that worktree.
 
 Load `~/.claude/kit/templates/HANDOFF-FMT.md` and follow it exactly before writing anything.
 
 ```bash
 SLUG=$(echo "[short title]" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g' | cut -c1-40)
 DATE=$(date +%Y-%m-%d)
-mkdir -p .desk/handoffs
-HANDOFF_PATH=".desk/handoffs/handoff_${DATE}-${SLUG}.md"
+mkdir -p .grimoire/handoffs
+HANDOFF_PATH=".grimoire/handoffs/handoff_${DATE}-${SLUG}.md"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no branch")
 ```
 
-Create `.desk/handoffs/` lazily, only for the first handoff. Write the file with the Write tool.
+Create `.grimoire/handoffs/` lazily, only for the first handoff. Write the file with the Write tool.
 
 </where-it-goes>
 
@@ -58,7 +58,7 @@ The template's "Context the next session will need" section points at wiki pages
 
 If `.wiki/` exists, run `grep -r '^summary: ' .wiki/ --include='*.md'` and pick only the pages whose summaries bear on this idea, and reference them by path with one line each on why they matter. If it does not exist, omit the section. Do not create the folder and do not remark on its absence.
 
-Never reference `.desk/plan.md` or `.desk/review.md`: both get overwritten or pruned, so the pointer would dangle by the time this handoff is picked up. Reference by path, never copy content. Redact API keys, tokens and personal data.
+Never reference `.grimoire/plan.md` or `.grimoire/review.md`: both get overwritten or pruned, so the pointer would dangle by the time this handoff is picked up. Reference by path, never copy content. Redact API keys, tokens and personal data.
 
 </context-section>
 
@@ -86,7 +86,7 @@ The handoff is an input, not knowledge. It is superseded the moment a plan exist
 
 When a plan is created from a handoff, **ask before deleting the handoff.** Never delete it silently, and never delete it before the plan file is written.
 
-If the idea needs to outlive the worktree, promote it: turn it into a plan, or, when `.wiki/` exists, distil it into a page. A handoff sitting in `.desk/` disappears with the worktree.
+If the idea needs to outlive the worktree, promote it: turn it into a plan, or, when `.wiki/` exists, distil it into a page. A handoff sitting in `.grimoire/` disappears with the worktree.
 
 </lifecycle>
 

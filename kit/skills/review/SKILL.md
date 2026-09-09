@@ -180,16 +180,16 @@ Title, then **Mode**, **Date**, **Files changed**, **CI** (passing, failing, pen
 
 Derive the verdict from the worst severity present. Any Critical means **Request changes**. A Major with no Critical is a judgment call, default to **Needs discussion** unless the Majors are clearly optional. Only Minor and Nit means **Approve**. One sentence justifying it, plus the verdict's own evidence label.
 
-Save the review to `.desk/review.md`, overwriting the previous run. No dated filenames, no accumulation. For a PR you re-review, GitHub holds the durable record.
+Save the review to `.grimoire/review.md`, overwriting the previous run. No dated filenames, no accumulation. For a PR you re-review, GitHub holds the durable record.
 
 ```bash
-mkdir -p .desk
+mkdir -p .grimoire
 ```
 
 Then open it, unless the session is already inside the editor:
 
 ```bash
-[ "${TERM_PROGRAM:-}" = "vscode" ] || code . .desk/review.md 2>/dev/null || echo "saved: .desk/review.md"
+[ "${TERM_PROGRAM:-}" = "vscode" ] || code . .grimoire/review.md 2>/dev/null || echo "saved: .grimoire/review.md"
 ```
 
 Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
@@ -249,7 +249,7 @@ A review is a raw source. Its lasting value, not the per-line nits, compounds in
 `/build`'s deferred distillation owns the flow: folder choice, new versus update, the confirm batch, and never writing before approval. Page format and frontmatter live in `~/.claude/kit/templates/WIKI-PAGE-FMT.md`. Only the review specific parts are here.
 
 - Pick durable items out of the **findings and the diff** only: a recurring trap is a gotcha, a non-obvious behaviour of a module is a component page, a root cause or pattern worth remembering is a lesson or a concept. Per-PR nitpicks never qualify.
-- `source` names this review, the branch or the PR as plain text plus durable anchors (`path:line`, PR, commit), never a link, because `.desk/review.md` is overwritten every run.
+- `source` names this review, the branch or the PR as plain text plus durable anchors (`path:line`, PR, commit), never a link, because `.grimoire/review.md` is overwritten every run.
 - If nothing durable surfaced, say so and skip. Never manufacture pages.
 
 The review guidelines (be specific, signal over noise, do not flag deliberate decisions, stay inside the diff) live in `REVIEW-FMT.md`, already loaded above. One more holds only here: acknowledge existing reviewer comments, do not repeat what has already been said.

@@ -47,7 +47,7 @@ These are not style. Each one converts a failure into silence.
 
 `rules/code.md`: no tests unprompted. A new test file, or a new case in an existing one, is a finding unless one of these holds:
 
-- a plan task named it in `verify:`. Read `.desk/plan.md` when it exists and match against the `verify:` lines.
+- a plan task named it in `verify:`. Read `.grimoire/plan.md` when it exists and match against the `verify:` lines.
 - the user asked for it in the request the caller passed you.
 - it repairs a test the change broke. Repair is expected and is not a new test.
 
@@ -74,7 +74,7 @@ BAR LOWERED
   path/to/x.test.ts    3 cases deleted, not replaced
 
 UNREQUESTED TESTS
-  path/to/new.test.ts  4 cases, no verify: line in .desk/plan.md names them
+  path/to/new.test.ts  4 cases, no verify: line in .grimoire/plan.md names them
 
 MUST KILL
   parseInput          renames to parseAndNormalizeDates, the comment exists

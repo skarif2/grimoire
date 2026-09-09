@@ -28,7 +28,7 @@ source: feat/in-app-chat plan; src/chat/store.ts:142; PR #1204
 
 `status` is `current`, `needs-verification` or `stale`. Use `needs-verification` for provisional synthesis and `stale` when newer sources may have superseded the page. Lint surfaces both.
 
-`source` names the originating plan, branch or task as plain text and adds durable anchors. Never `[[link]]` a plan or review file: those live in `.desk/`, are gitignored and get pruned, so the link would dangle.
+`source` names the originating plan, branch or task as plain text and adds durable anchors. Never `[[link]]` a plan or review file: those live in `.grimoire/`, are gitignored and get pruned, so the link would dangle.
 
 ## Bodies
 
