@@ -194,7 +194,7 @@ Then open it, unless the session is already inside the editor:
 
 Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
 
-On **Approve**, also produce the approval message below. Whatever the verdict, produce the daily update.
+On **Approve**, also produce the approval message below. Produce the daily update too, whatever the verdict, but only if a `voice` skill is installed.
 
 ## Fix, plan, or leave it
 
@@ -227,9 +227,11 @@ Approval message (paste on the PR):
 > NOTE: the inline type-guard tidy-up is a nice-to-have follow-up, not a blocker.
 ```
 
-## Daily update
+## Daily update (only with a `voice` skill)
 
-Whatever the verdict, produce a standup line, through the same `voice` skill when one is installed, with the `unslop` skill applied. `/build`'s daily update owns the canonical wording and the shared rules (no CI, no headers, no bullets, one short paragraph); only what differs for a review is repeated here.
+**Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
+
+With one installed, produce a standup line whatever the verdict, through `voice`, with the `unslop` skill applied. `/build`'s daily update owns the canonical wording and the shared rules (no CI, no headers, no bullets, one short paragraph); only what differs for a review is repeated here.
 
 - Lead with the PR title verbatim and its number, then say what the PR actually does in one or two lines, pulled from the diff and description, not from a finding-by-finding log.
 - Approve: `Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.`

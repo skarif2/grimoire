@@ -240,6 +240,10 @@ Five reviewers read your diff at once: correctness, quality, architecture, tests
 | **`/unslop`** | Strips the tells out of anything a human will read. |
 | **`/bro`** | Says your own message back to you in plain words, so you can see what landed. |
 
+Anything a person will read goes through these before you see it: the PR body, the commit message, the review comment.
+
+If you write a skill of your own called `voice`, describing how you sound, Grimoire will use it for all of that. It also unlocks the one thing that is off by default: a standup message drafted at the end of `/build` and `/review`. No `voice` skill means no standup message, because a line written in nobody's voice is not worth pasting anywhere.
+
 #### Quick answers
 
 | Command | What it does |

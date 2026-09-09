@@ -40,7 +40,7 @@ Plan approved. Execute now.
    rm -f "$PLAN_FILE"   # prune on Done
    ```
 7. **Distil into the wiki (draft, then confirm).** See **Deferred distillation** below. **Gate it on `.wiki/` existing.** If the directory is absent the project has not opted in: skip this step entirely and silently, do not create the directory, do not write to it, do not offer to, and do not mention its absence.
-8. **Draft the PR, a daily update, and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any), a 1 to 2 line daily update message, and the three part change summary (files changed, things I did not touch, potential concerns). See **PR draft and daily update** below.
+8. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary (files changed, things I did not touch, potential concerns). Add a 1 to 2 line daily update **only if a `voice` skill is installed**. See **PR draft and daily update** below.
 
 ## Execution guidelines
 
@@ -127,9 +127,11 @@ These are prose other people read, so both prose skills apply: the `voice` skill
    code "$(pwd)" "$PR_FILE" 2>/dev/null || echo "  saved: $PR_FILE"
    ```
 
-### 2. Daily update message
+### 2. Daily update message (only with a `voice` skill)
 
-Also produce a short **daily update** message (think standup) for the user to paste. **Write it through the `voice` skill when one is installed, and apply the `unslop` skill.** `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person. Same treatment in `/review`, so the two stay consistent.
+**Presence is the switch.** No `voice` skill installed means the user never opted into standup messages: do not produce one, do not offer, do not mention its absence. Skip to the change summary.
+
+With one installed, produce a short **daily update** (think standup) for the user to paste. **Write it through `voice`, then apply the `unslop` skill.** `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Same gate and same treatment in `/review`, so the two stay consistent.
 
 - **Never mention CI, checks, pipelines, or build status.**
 - No section headers, no bullet lists. It is one short paragraph.
@@ -300,4 +302,4 @@ Reached only when step 1 found all phases `done`. Gate both steps on **every** p
    rm -f "$PLAN_FILE"   # prune on Done
    ```
 3. **Propose the final doc-commit.** After the wiki pages are written, propose the doc-commit covering those wiki changes, see **Propose commit(s), Final doc-commit**. Skipped when `.wiki/` does not exist.
-4. **Draft the PR, a daily update, and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any), a 1 to 2 line daily update message, and the three part change summary, all derived from the cumulative diff plus every phase's `Notes:`. See **PR draft and daily update** above.
+4. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary, all derived from the cumulative diff plus every phase's `Notes:`. Add a 1 to 2 line daily update **only if a `voice` skill is installed**. See **PR draft and daily update** above.
