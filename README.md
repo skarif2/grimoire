@@ -67,18 +67,81 @@ flowchart LR
 
 ## Install
 
+### What you need
+
+| Tool | Needed for |
+|:--|:--|
+| **Claude Code** | Everything. It is the plugin host. |
+| **git** | Everything. Worktrees are optional, but this is better with them. |
+| **gh** | Reading your tickets and drafting pull requests. Skip it and those steps go quiet. |
+
+<br/>
+
+### 1. Add it
+
+Inside a Claude Code session:
+
 ```bash
 /plugin marketplace add skarif2/GRIMOIRE
-/plugin install grimoire@grimoire
+/plugin install grimoire
 ```
 
-Then, in any project you want a memory for:
+Or from your shell, without opening a session:
+
+```bash
+claude plugin marketplace add skarif2/GRIMOIRE
+claude plugin install grimoire
+```
+
+The first command registers the catalog, the second installs the plugin from it. Restart Claude Code so it loads.
+
+<br/>
+
+### 2. Check it landed
+
+```bash
+claude plugin list
+```
+
+`grimoire` should be there and enabled. In a session, typing `/` now offers `/plan`, `/build` and `/review`.
+
+<br/>
+
+### 3. Give a project a memory
+
+Once per repository, from anywhere inside it:
 
 ```bash
 /wiki-init
 ```
 
-That is it. Nothing to configure, no files to edit, no paths to set.
+That creates the wiki branch, checks it out a single time, points every worktree at that one copy, and hides both folders from git. Nothing to configure, no files to edit, no paths to set.
+
+Skip this step and everything still works, you simply get no wiki. That is a supported way to run, not a broken install.
+
+<br/>
+
+### Try it without installing
+
+To load it for one session and leave your setup untouched:
+
+```bash
+claude --plugin-dir /path/to/GRIMOIRE/claude-kit
+```
+
+Nothing is written to your config, and it is gone when the session ends.
+
+<br/>
+
+### Update, disable, remove
+
+```bash
+claude plugin update grimoire
+claude plugin disable grimoire
+claude plugin uninstall grimoire
+```
+
+Updating needs a restart to take effect. Disabling keeps it installed but dormant, which is the fastest way to tell whether Grimoire is behind some behaviour you did not expect.
 
 <br/>
 
@@ -225,16 +288,6 @@ Plenty of teams cannot put engineering notes in a branch, and plenty of codebase
 No `.wiki` folder means the project never opted in. Every skill notices, stays quiet, and gets on with the work. It will not create one, will not write to one, will not offer, and will not remark on its absence.
 
 You can run `/plan`, `/build`, `/review` and everything else on a repo with no wiki at all. You simply get less prior knowledge, which is exactly what you have today.
-
-<br/>
-
-## Requirements
-
-| Tool | Needed for |
-|:--|:--|
-| **Claude Code** | Everything. It is the plugin host. |
-| **git** | Everything. Worktrees are optional, but this is better with them. |
-| **gh** | Reading your tickets and drafting pull requests. Skip it and those steps go quiet. |
 
 <br/>
 
