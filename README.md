@@ -1,15 +1,46 @@
-# Grimoire
+<div align="center">
 
-**Your agent relearns the codebase every session.**
+# 📜 Grimoire ✨
 
-You explain the architecture. You explain the trap in the date handling. You explain why that module looks wrong but is load bearing. Then the context window fills, the session ends, and tomorrow you explain all of it again.
+### Your agent relearns the codebase every session.
 
-Grimoire gives a project somewhere to keep what it learned, and gives you a set of skills that read from it before they do anything.
+Give it somewhere to remember.
 
-```
-.grimoire/     what you are working on today
-.wiki/         what this project has learned
-```
+<br/>
+
+[![version](https://img.shields.io/badge/version-0.1.0-6366f1?style=flat-square)](https://github.com/skarif2/GRIMOIRE)
+[![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
+[![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
+[![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
+
+</div>
+
+<br/>
+
+You explain the architecture. You explain the trap in the date handling. You explain why that module looks wrong but is load bearing.
+
+Then the context window fills, the session ends, and tomorrow you explain all of it again.
+
+<br/>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**`.grimoire/`**
+
+What you are working on today. The plan, the review, the PR draft. Gitignored, and it dies with the branch.
+
+</td>
+<td width="50%" valign="top">
+
+**`.wiki/`**
+
+What this project has learned. Concepts, decisions, traps. Shared by every worktree, and it outlives all of them.
+
+</td>
+</tr>
+</table>
 
 Two folders at the root of your repo. That is the whole idea.
 
@@ -25,100 +56,116 @@ flowchart LR
     V -. "what it learned" .-> W
     W -. "read before planning" .-> P
 
-    style W fill:#1f2937,stroke:#4b5563,color:#f9fafb
-    style T fill:#374151,stroke:#4b5563,color:#f9fafb
-    style PR fill:#374151,stroke:#4b5563,color:#f9fafb
+    style W fill:#6366f1,stroke:#4f46e5,color:#ffffff
+    style T fill:#334155,stroke:#475569,color:#f8fafc
+    style PR fill:#334155,stroke:#475569,color:#f8fafc
 ```
 
-The solid line is one ticket, start to finish. The dotted line is the part that usually goes missing: what the work taught you, going somewhere it can be found again.
+> The solid line is one ticket, start to finish. The dotted line is the part that usually goes missing: what the work taught you, going somewhere it can be found again.
 
----
+<br/>
 
 ## Install
 
-```
+```bash
 /plugin marketplace add skarif2/GRIMOIRE
 /plugin install grimoire@grimoire
 ```
 
 Then, in any project you want a memory for:
 
-```
+```bash
 /wiki-init
 ```
 
-That is it. Nothing else to configure, no files to edit, no paths to set.
+That is it. Nothing to configure, no files to edit, no paths to set.
 
----
+<br/>
 
 ## The five minute version
 
-**Start a ticket.**
+<table>
+<tr><td>
 
-```
+**1. Start a ticket**
+
+```bash
 /plan add rate limiting to the upload endpoint
 ```
 
-It reads your ticket from the tracker, asks you a handful of sharp questions, argues with your assumptions, and writes a plan only once you have actually approved it. Not "sounds good". Actually approved.
+It reads your ticket from the tracker, asks a handful of sharp questions, argues with your assumptions, and writes a plan only once you have actually approved it. Not "sounds good". Actually approved.
 
-**Do the work.**
+</td></tr>
+<tr><td>
 
-```
+**2. Do the work**
+
+```bash
 /build
 ```
 
-It executes the plan, verifies each step, reviews its own diff, and drafts the pull request. It never commits. It hands you the command and lets you run it.
+It executes the plan, verifies every step, reviews its own diff, and drafts the pull request. It never commits. It hands you the command and lets you run it.
 
-**Check the work.**
+</td></tr>
+<tr><td>
 
-```
+**3. Check the work**
+
+```bash
 /review
 ```
 
-Five reviewers read your diff at once, one for correctness, one for quality, one for architecture, one for tests, one for security. They report side by side. None of them is allowed to bury another's findings.
+Five reviewers read your diff at once: correctness, quality, architecture, tests, security. They report side by side, and none of them is allowed to bury another's findings.
+
+</td></tr>
+</table>
+
+<br/>
+
+## Everything it can do
+
+#### Plan and build
+
+| Command | What it does |
+|:--|:--|
+| **`/plan`** | Interviews you before writing anything. Reads the ticket. Splits work too big for one sitting. |
+| **`/build`** | Runs the plan, verifies every step, reviews itself, drafts the PR. |
+
+#### Check the work
+
+| Command | What it does |
+|:--|:--|
+| **`/review`** | Five lenses in parallel, severity rated, each finding labelled with how strong its evidence is. |
+| **`/adversary`** | Assumes your plan is wrong and tries to prove it. Reports only what survives its own refutation. |
+| **`/debug`** | Refuses to guess. No hypothesis until it has a command that reproduces the bug on demand. |
+
+#### Keep what you learned
+
+| Command | What it does |
+|:--|:--|
+| **`/wiki-init`** | Gives this project a wiki. Once per repo. |
+| **`/handoff`** | Catches an idea that surfaced mid task and packages it for later. |
+| **`/retro`** | Looks at how the session went and improves the setup, not the code. |
+
+#### Write like a person
+
+| Command | What it does |
+|:--|:--|
+| **`/unslop`** | Strips the tells out of anything a human will read. |
+| **`/bro`** | Says your own message back to you in plain words, so you can see what landed. |
+
+#### Quick answers
+
+| Command | What it does |
+|:--|:--|
+| **`/skim`** | Fast answer. Touches nothing. |
+| **`/dig`** | Deep answer. Touches nothing. |
+
+<br/>
 
 ---
 
-## What you get
-
-**Plan and build**
-
-| | |
-|---|---|
-| `/plan` | Interviews you before writing anything. Reads the ticket. Splits work that is too big for one sitting. |
-| `/build` | Runs the plan, verifies every step, reviews itself, drafts the PR. |
-
-**Check the work**
-
-| | |
-|---|---|
-| `/review` | Five lenses in parallel, severity rated, with an explicit note on how strong the evidence is. |
-| `/adversary` | Assumes your plan is wrong and tries to prove it. Reports only what survives its own attempt to refute it. |
-| `/debug` | Refuses to guess. No hypothesis until it has a command that reproduces the bug on demand. |
-
-**Keep what you learned**
-
-| | |
-|---|---|
-| `/wiki-init` | Gives this project a wiki. Once per repo. |
-| `/handoff` | Catches an idea that surfaced mid task and packages it for later. |
-| `/retro` | Looks at how the session went and improves the setup, not the code. |
-
-**Write like a person**
-
-| | |
-|---|---|
-| `/unslop` | Strips the tells out of anything a human will read. |
-| `/bro` | Says your own message back to you in plain words, so you can see what landed. |
-
-**Quick answers**
-
-| | |
-|---|---|
-| `/skim` | Fast answer. Touches nothing. |
-| `/dig` | Deep answer. Touches nothing. |
-
----
+<br/>
 
 ## The part nobody else does
 
@@ -128,7 +175,8 @@ Grimoire puts the wiki on its own orphan branch, checks it out exactly once, and
 
 ```mermaid
 flowchart TD
-    subgraph repo["your repo"]
+    subgraph repo[" your repo "]
+        direction LR
         M["main/"]
         A["feature-a/"]
         B["feature-b/"]
@@ -140,28 +188,35 @@ flowchart TD
     A -- ".wiki" --> W
     B -- ".wiki" --> W
 
-    style W fill:#1f2937,stroke:#4b5563,color:#f9fafb
+    style W fill:#6366f1,stroke:#4f46e5,color:#ffffff
+    style M fill:#334155,stroke:#475569,color:#f8fafc
+    style A fill:#334155,stroke:#475569,color:#f8fafc
+    style B fill:#334155,stroke:#475569,color:#f8fafc
 ```
 
-Every worktree points at the same folder. Not a copy of it, the same one.
+**Every worktree points at the same folder. Not a copy of it, the same one.**
 
 Write a page while working on one branch and it is readable from every other branch immediately. No commit. No merge. No pull.
 
 The branch shares no history with `main`, so a wiki page can never appear in a feature diff and can never cause a conflict. Your teammates get it with one command, and their normal clone stays exactly as clean as it was.
 
----
+<br/>
 
 ## Four promises
 
-**It never commits.** It writes the message, scopes the files, and hands you a command. You run it. Every time.
+> **It never commits.**
+> It writes the message, scopes the files, and hands you a command. You run it. Every time.
 
-**It never writes comments you did not ask for.** There is a closed list of three cases where a comment earns its place. Everything else gets deleted by an agent that never wrote the code and has nothing to defend.
+> **It never writes comments you did not ask for.**
+> There is a closed list of three cases where a comment earns its place. Everything else is deleted by an agent that never wrote the code and has nothing to defend.
 
-**It never writes tests you did not ask for.** It will tell you in one line what is worth covering, then stop and wait.
+> **It never writes tests you did not ask for.**
+> It tells you in one line what is worth covering, then stops and waits.
 
-**It never writes to the wiki behind your back.** It drafts the pages, shows you, and waits.
+> **It never writes to the wiki behind your back.**
+> It drafts the pages, shows you, and waits.
 
----
+<br/>
 
 ## Your workplace may not allow this
 
@@ -171,44 +226,94 @@ No `.wiki` folder means the project never opted in. Every skill notices, stays q
 
 You can run `/plan`, `/build`, `/review` and everything else on a repo with no wiki at all. You simply get less prior knowledge, which is exactly what you have today.
 
----
+<br/>
 
 ## Requirements
 
-Claude Code, and `git`. `gh` if you want tickets read and pull requests drafted for you.
+| Tool | Needed for |
+|:--|:--|
+| **Claude Code** | Everything. It is the plugin host. |
+| **git** | Everything. Worktrees are optional, but this is better with them. |
+| **gh** | Reading your tickets and drafting pull requests. Skip it and those steps go quiet. |
 
----
+<br/>
 
 ## Status
 
-Version 0.1.0. Young, and honest about it. The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
+**Version 0.1.0.** Young, and honest about it.
+
+The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
+
+<br/>
 
 ---
+
+<br/>
 
 ## Why "Grimoire"
 
-A grimoire is a book you keep, add to, and consult before attempting something difficult. It is not a manual someone handed you. It is the one you wrote, from things that actually happened.
+A grimoire is a book you keep, add to, and consult before attempting something difficult.
+
+It is not a manual someone handed you. It is the one you wrote, from things that actually happened.
 
 That is the entire pitch. Your agent should have one.
 
----
+<br/>
 
 ## Standing on other people's work
 
 Very little here is original. Most of it is an idea someone else had, adapted to fit two folders and a rule against doing anything without asking. Naming names, because vague thanks is worth nothing.
 
-**[mattpocock/skills](https://github.com/mattpocock/skills)** is the largest debt. `/adversary`, `/handoff` and the shape of `/plan` all began there. So did four ideas that changed the design: posting a brief as a ticket comment that supersedes a stale description, treating phases as a dependency graph with a takeable frontier rather than a queue, the fog test that separates a decision from a build step, and `/debug` refusing to form a hypothesis until it has a command that reproduces the bug. `/retro`, and the rule that coding standards belong to the reviewer rather than the implementer, are his too.
+<details open>
+<summary><b>mattpocock/skills</b> &nbsp;&middot;&nbsp; the largest debt</summary>
 
-**[addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)** taught `/plan` how to interview. Attaching a guess to every question so you react instead of composing, and refusing to accept "sounds good" as approval, both come from there. So does the list of signals that work is too big for one sitting, the habit of watching a diff for a quietly lowered bar, and the change summary section that says what was deliberately left alone.
+<br/>
 
-**[cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack)** gave us `/unslop` almost whole, including the stable rule numbers that let other skills cite a rule instead of restating it. Their comment agent is the ancestor of ours, and its best idea survives intact: when a comment explains a surprise in your own code, do not delete the comment, name the rename or extraction that would make the prose unnecessary. `/bro`, the evidence ladder, and the rule that a judge should run on a different model family than the author are all theirs.
+`/adversary`, `/handoff` and the shape of `/plan` all began [there](https://github.com/mattpocock/skills). So did four ideas that changed the design: posting a brief as a ticket comment that supersedes a stale description, treating phases as a dependency graph with a takeable frontier rather than a queue, the fog test that separates a decision from a build step, and `/debug` refusing to form a hypothesis until it has a command that reproduces the bug. `/retro`, and the rule that coding standards belong to the reviewer rather than the implementer, are his too.
 
-**Andrej Karpathy** for the compiled wiki pattern, the idea that raw notes and distilled pages are different layers and mixing them is what makes a knowledge base rot.
+</details>
 
-**Martin Fowler**, whose smell catalogue the quality reviewer reads verbatim.
+<details>
+<summary><b>addyosmani/agent-skills</b> &nbsp;&middot;&nbsp; taught /plan how to interview</summary>
+
+<br/>
+
+Attaching a guess to every question so you react instead of composing, and refusing to accept "sounds good" as approval, both come from [there](https://github.com/addyosmani/agent-skills). So does the list of signals that work is too big for one sitting, the habit of watching a diff for a quietly lowered bar, and the change summary section that says what was deliberately left alone.
+
+</details>
+
+<details>
+<summary><b>cursor/plugins</b> &nbsp;&middot;&nbsp; gave us /unslop almost whole</summary>
+
+<br/>
+
+Including the stable rule numbers that let other skills cite a rule instead of restating it. [Their](https://github.com/cursor/plugins/tree/main/pstack) comment agent is the ancestor of ours, and its best idea survives intact: when a comment explains a surprise in your own code, do not delete the comment, name the rename or extraction that would make the prose unnecessary. `/bro`, the evidence ladder, and the rule that a judge should run on a different model family than the author are all theirs.
+
+</details>
+
+<details>
+<summary><b>Andrej Karpathy</b> &nbsp;&middot;&nbsp; <b>Martin Fowler</b></summary>
+
+<br/>
+
+Karpathy for the compiled wiki pattern, the idea that raw notes and distilled pages are different layers, and that mixing them is what makes a knowledge base rot. Fowler for the smell catalogue the quality reviewer reads verbatim.
+
+</details>
+
+<br/>
 
 Where an idea was worth taking but came wrapped in a fixed sequence of steps or a mandated folder layout, we took the idea and left the rest. That is a compliment to the thinking, not a criticism of the packaging.
 
----
+<br/>
 
-Built by [Sk Arif](https://github.com/skarif2). MIT licensed.
+## License
+
+MIT.
+
+<br/>
+
+<div align="center">
+
+Built by [Sk Arif](https://github.com/skarif2)
+
+</div>
