@@ -1,0 +1,13 @@
+{
+  "description": "Injects the resident rules, the only part of the toolkit a plugin cannot install into CLAUDE.md.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/inject-rules.mjs\"" }
+        ]
+      }
+    ]
+  }
+}
