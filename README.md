@@ -105,6 +105,8 @@ claude plugin list
 
 `grimoire` should be there and enabled. In a session, typing `/` now offers `/plan`, `/build` and `/review`.
 
+To see exactly what it adds to a session, `claude plugin details grimoire` prints every component and what each one costs you in tokens.
+
 <br/>
 
 ### 3. Give a project a memory
@@ -121,15 +123,35 @@ Skip this step and everything still works, you simply get no wiki. That is a sup
 
 <br/>
 
-### Try it without installing
+### Try it without touching your setup
 
-To load it for one session and leave your setup untouched:
+Two ways, depending on how long you want to keep it around.
+
+**One session, nothing installed.** Clone the repo and point at it:
 
 ```bash
 claude --plugin-dir /path/to/grimoire/claude-kit
 ```
 
 Nothing is written to your config, and it is gone when the session ends.
+
+**A real install, in a sandbox.** `CLAUDE_CONFIG_DIR` gives Claude Code a completely separate profile: its own settings, its own installed plugins, its own history, no contact with your everyday setup.
+
+```bash
+export CLAUDE_CONFIG_DIR=~/.claude-grimoire
+
+claude plugin marketplace add skarif2/grimoire
+claude plugin install grimoire
+claude
+```
+
+This one survives restarts, so you can live with it for a week before deciding. To undo the entire experiment:
+
+```bash
+rm -rf ~/.claude-grimoire
+```
+
+Open a new terminal, or unset the variable, and you are back on your normal setup as though none of it happened.
 
 <br/>
 
