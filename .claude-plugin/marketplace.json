@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "grimoire",
-      "source": "./claude-kit",
+      "source": "./grimoire",
       "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
       "category": "development"
     }
