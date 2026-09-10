@@ -21,7 +21,7 @@ BUDGET is a range with a hard top, not a score to minimise. Reading the diff and
 Spend it in this order:
 
 1. Read the diff. It arrives as a file, so this is one or two calls.
-2. **Open every changed file your lens has any claim about**, at full fidelity around the hunk. The diff shows you what changed, never what it changed *into*.
+2. **Open every changed file your lens has any claim about, at the hunk**: `Read` with `offset` and `limit` covering the hunk and its enclosing function, not the whole file. The diff shows you what changed, never what it changed *into*, and the window shows you that. A whole file is for a structural change or a file too short to bother windowing.
 3. **Follow each candidate finding one hop out**: the caller, the callee, the type. Most real bugs in a diff are invisible in the diff, because the changed line is fine and the thing it now feeds is not.
 4. Stop when a further call would not change any finding's severity or evidence level.
 
@@ -33,7 +33,7 @@ Do not survey the codebase, do not reopen what the diff already showed you in fu
 
 The diff is a keyhole. A finding built only from `+` lines is a guess.
 
-Open the changed files at full fidelity around each hunk, and follow the call one level out: who calls this, what does it call, what does the type actually permit. Use `git log -S<symbol>` or `git blame` on a line that looks wrong before calling it wrong, because a line that survived three years usually encodes something. Grep for other callers before claiming a signature change is safe.
+Open the changed files in a window around each hunk, and follow the call one level out with `Grep` on the changed symbol, then a window on each hit: who calls this, what does it call, what does the type actually permit. Use `git log -S<symbol>` or `git blame` on a line that looks wrong before calling it wrong, because a line that survived three years usually encodes something. Grep for other callers before claiming a signature change is safe.
 
 Ground third-party API claims in current docs, not memory, when the finding hinges on a library's real behaviour. An assumed default that the current docs contradict is a finding. Skip this for standard library and stable APIs.
 
