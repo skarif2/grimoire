@@ -1,7 +1,7 @@
 ---
 name: review
-description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. One inline pass by default, parallel lens agents only for a diff too wide for one reader. The verdict, the findings that matter, the message to post and the daily update all land in chat, labelled for pasting. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
-argument-hint: "[staged | current | PR number | PR URL]"
+description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. One inline pass, always, unless the argument carries `parallel`, which dispatches the five lens agents. The verdict, the findings that matter, the message to post and the daily update all land in chat, labelled for pasting. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
+argument-hint: "[staged | current | PR number | PR URL] [parallel]"
 ---
 
 # Review
@@ -14,6 +14,8 @@ Detect the mode from the argument.
 - `staged`: **staged**, what is about to be committed.
 - `current`: **pr**, find the open PR for the current branch and review that.
 - A PR number or a GitHub PR URL: **pr**, full PR review with CI status, existing comments and linked issues.
+
+The word `parallel` anywhere in the argument is a switch, not a mode: strip it, detect the mode from what is left, and set `ENGINE=parallel`. Without it, `ENGINE=inline`. Nothing else sets the engine.
 
 ## Noise exclusions
 
@@ -125,7 +127,7 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 Five lenses, in this order, and always all five: correctness (including performance defects), quality (with the smell baseline below, and structure), spec (when a spec was found), tests, security.
 
-**One inline pass, yourself, is the default.** Fan out to parallel reviewers only when a diff is genuinely too wide for one reader to hold at once, and say so in the engine line. A one or two file change never justifies five dispatches, and on a re-review the unit is the delta since the last round, which is almost always small. Across 27 recorded reviews the inline pass found the same dozen things the fan-outs did, at a third of the cost, so fanning out needs a reason and inline does not.
+**The engine is the switch, never a judgement.** `ENGINE=inline` means you run all five lenses yourself, in one pass, and dispatch nothing, whatever the size of the diff. If the diff is wider than one pass can hold, say so in the engine line and suggest the user rerun with `parallel`; do not decide it for them. `ENGINE=parallel` means you dispatch the five lens agents below. Across 27 recorded reviews the inline pass found the same dozen things the fan-outs did, at a third of the cost, which is why inline is the default and fan-out is something the user asks for.
 
 **Read the hunk and its neighbourhood, not the file.** The diff carries three lines of context, which is enough to see a change and never enough to judge it, so the next read is always the file. Open it at the hunk: `Read` with `offset` a little above the first changed line and `limit` covering the hunk plus the enclosing function. Then find who the change touches with `Grep` on the changed symbol, and open those hits the same way, one hop out. A whole file is for two cases only: the change is structural (a module moved, an export reshaped, a class split) or the file is short enough that a window would cost more than the file. Reading the whole of every changed file was the single largest input in recorded plain reviews, and none of the findings needed it.
 
@@ -133,7 +135,7 @@ Five lenses, in this order, and always all five: correctness (including performa
 
 **Never rerank across lenses.** Report findings side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. Severity ranks findings inside a lens, never between lenses.
 
-**State the engine in one line at the top of the review**: inline or parallel, and why. "Inline, 5 files but 3 substantive" and "Parallel, 62 files across four subsystems" are both good lines.
+**State the engine in one line at the top of the review**: `Inline` or `Parallel (asked)`, with the file count. If inline and the diff was wider than one pass could cover well, add "rerun with `parallel` for full depth" to that line.
 
 ## Smell baseline
 
