@@ -284,10 +284,12 @@ Only for **Approve**. Skip it entirely for Request changes and Needs discussion.
 - Leftover Minor or Nit findings, or a pending Copilot or other review, still approve, then add one `NOTE:` line framing them as a follow-up and explicitly not a blocker. Several small things get summarised in that one line, not listed. Critical and Major findings never appear here, because they change the verdict.
 
 ```
-Approval message (paste on the PR):
+Approval message:
 > LGTM, clean and well scoped, happy to approve.
 > NOTE: the inline type-guard tidy-up is a nice-to-have follow-up, not a blocker.
 ```
+
+Write it to `.grimoire/message.md` as well, so posting it is one flag away. See **Posting it**.
 
 ## Change request
 
@@ -309,8 +311,10 @@ If nothing survives that filter, the verdict was wrong. Say so, and go back and 
 
 On a re-review, lead instead with what is now resolved, then list only what is still open and what is newly broken. Never repeat a point the author already fixed, and never repeat a point another reviewer already made.
 
+Write it to `.grimoire/message.md` too, and list the findings that earned an inline anchor with their `file:line`. See **Posting it**.
+
 ```
-Change request (paste on the PR):
+Change request:
 > Nice fix, the tree part works well. Two things before I approve.
 >
 > - In the list view, rescheduling from the right click menu loses focus
@@ -323,6 +327,69 @@ Change request (paste on the PR):
 > Rest looks good to me.
 ```
 
+## Posting it
+
+A review is one GitHub review, not a body plus a scattering of loose comments. Bundle the verdict, the message and every inline note into a single API call, so the author gets one notification and one thread to answer.
+
+**Draft, show, confirm, post. In that order, every time.** Posting is outward facing and it is under the user's name, so it never happens on the same turn it was drafted and never without an explicit yes. Show the message and the inline comments in chat first, offer to post, and if the user says nothing about posting, hand over the command and stop. Same rule the ticket brief follows in `/plan`.
+
+**Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.grimoire/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
+
+**Body only**, when nothing needs anchoring to a line:
+
+```bash
+gh pr review <number> --approve         --body-file .grimoire/message.md
+gh pr review <number> --request-changes --body-file .grimoire/message.md
+gh pr review <number> --comment         --body-file .grimoire/message.md
+```
+
+**Body plus inline comments**, one review:
+
+```bash
+cat > /tmp/review.json <<'JSON'
+{
+  "event": "REQUEST_CHANGES",
+  "body": "<the change request, voice applied>",
+  "comments": [
+    { "path": "src/hooks/useSingleLinearScheduling.ts", "line": 225, "side": "RIGHT",
+      "body": "<one finding, in plain words>" }
+  ]
+}
+JSON
+gh api "repos/{owner}/{repo}/pulls/<number>/reviews" --method POST --input /tmp/review.json
+```
+
+`event` is `APPROVE`, `REQUEST_CHANGES` or `COMMENT`, and it has to agree with the verdict the review file already reached.
+
+**Check every anchor before you post.** `line` is the line number on the post-change side, and GitHub rejects the **entire** review with a 422 if one comment points outside the diff hunks. One bad number loses the whole thing, so verify first rather than find out from the API:
+
+```bash
+awk '/^\+\+\+ b\// { path=substr($2,3); next }
+     /^@@ / { match($0, /\+[0-9]+(,[0-9]+)?/); spec=substr($0,RSTART+1,RLENGTH-1)
+              n=split(spec,p,","); start=p[1]+0; len=(n>1?p[2]+0:1)
+              if (path!="" && len>0) print path"\t"start"\t"(start+len-1) }' "$DIFF" > /tmp/hunks.tsv
+
+python3 - /tmp/review.json <<'PY'
+import json,sys
+rows=[l.split("\t") for l in open("/tmp/hunks.tsv").read().splitlines() if l]
+ok=lambda p,n: any(r[0]==p and int(r[1])<=n<=int(r[2]) for r in rows)
+bad=[f'{c["path"]}:{c["line"]}' for c in json.load(open(sys.argv[1])).get("comments",[])
+     if not ok(c["path"], int(c["line"]))]
+print("OUTSIDE DIFF: "+", ".join(bad) if bad else "all anchors inside the diff")
+sys.exit(1 if bad else 0)
+PY
+```
+
+Non-zero means do not post. Move each named finding into the body and re-check, rather than nudging its line number until it passes. Take anchors from `$DIFF` in the first place, never from reading the file at HEAD, and never from a lens that cited a line it inferred.
+
+**You cannot review your own PR.** GitHub rejects approve and request-changes from the author, so gate on the variables the pr mode already resolved:
+
+```bash
+[ "$ME" = "$AUTHOR" ] && echo "own PR: message is for reading, not posting" && exit 0
+```
+
+On your own PR the authorship gate has already ended the posting path anyway; this is the belt to its braces.
+
 ## Daily update (only with a `voice` skill)
 
 **Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
@@ -334,9 +401,11 @@ With one installed, produce a standup line whatever the verdict, through `voice`
 - Request changes or Needs discussion, one line: `Reviewed <title> (#<num>), sent feedback on <the gist>.`
 
 ```
-Daily update (paste in standup):
+Daily update:
 > Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.
 ```
+
+Write it to `.grimoire/standup.md`, next to `message.md`, so it survives the session and can be pasted or piped without scrolling back for it. There is no API for this one: standup lives in Slack or Discord, so posting it is always the user's own hand.
 
 ## Distillation
 
