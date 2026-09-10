@@ -1,6 +1,6 @@
 ---
 name: review
-description: Multi-lens code review (correctness, quality, architecture, tests, security) for staged changes, local branch diffs, or open PRs. Runs parallel review agents when the host supports them, else a single inline pass. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes a paste-ready approval message on Approve. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
+description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. Triages the diff to pick which lenses earn their cost, runs them as budgeted parallel agents when the host supports them, else a single inline pass. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
 argument-hint: "[staged | current | PR number | PR URL]"
 ---
 
@@ -25,7 +25,7 @@ Every diff command carries these pathspecs. They add bytes without signal.
 
 ## Gathering the diff
 
-Write the diff to a temp file and keep the path. Parallel reviewers each read it themselves, so a large diff never has to be pasted into the conversation five times.
+Write the diff to a temp file and keep the path, and keep the changed-file list in `$CHANGED`, because triage and every dispatch below read both. Parallel reviewers open the file themselves, so a large diff is never pasted into the conversation once per lens.
 
 ```bash
 DIFF=$(mktemp -t review-diff)
@@ -35,7 +35,7 @@ DIFF=$(mktemp -t review-diff)
 
 ```bash
 git diff --staged -U3 <exclusions> > "$DIFF"
-git diff --staged --name-only
+CHANGED=$(git diff --staged --name-only)
 ```
 
 **local**
@@ -51,24 +51,13 @@ else
   REF=""
 fi
 [ -n "$REF" ] && git diff "$REF...HEAD" -U3 <exclusions> > "$DIFF"
-[ -n "$REF" ] && git diff "$REF...HEAD" --name-only
+CHANGED=$(git diff "$REF...HEAD" --name-only)
 ```
 
-**The base ref has to resolve.** `origin/HEAD` is unset on a manually added remote and in most bare-repo worktree layouts, so the `main` fallback can name a ref that does not exist: `git diff` then exits 128, the redirect leaves a zero byte file, and five lenses review nothing and report a clean branch. Verify the ref first, fall back to the local branch, and if neither resolves, stop and ask the user for the base instead of guessing.
+**The base ref has to resolve.** `origin/HEAD` is unset on a manually added remote and in most bare-repo worktree layouts, so the `main` fallback can name a ref that does not exist: `git diff` then exits 128, the redirect leaves a zero byte file, and the lenses review nothing and report a clean branch. Verify the ref first, fall back to the local branch, and if neither resolves, stop and ask the user for the base instead of guessing.
 
 **An empty diff is never a clean review.** After writing `$DIFF`, check it: `[ -s "$DIFF" ] || echo "empty diff"`. Empty means say so, name the base you tried, and stop. Never dispatch a lens against an empty file.
 
-Then a cheap heuristic pass. It prints flags, not file content.
-
-```bash
-CHANGED=$(git diff "$REF...HEAD" --name-only)
-COUNT=$(printf '%s\n' "$CHANGED" | grep -c . || echo 0)
-[ "$COUNT" -gt 20 ] && echo "Large diff: $COUNT files, consider a focused review"
-printf '%s\n' "$CHANGED" | grep -E '^src/.*\.(ts|tsx|js|jsx)$' | grep -Ev '\.(test|spec)\.' | while read -r f; do
-  STEM=$(basename "$f" | sed 's/\..*//')
-  printf '%s\n' "$CHANGED" | grep -qE "$STEM\.(test|spec)\." || echo "No test counterpart: $f"
-done
-```
 
 **pr**
 
@@ -85,6 +74,7 @@ Then fetch metadata and the diff:
 ```bash
 gh pr view <number> --json number,title,body,author,baseRefName,headRefName,state,statusCheckRollup,reviews,files
 gh pr diff <number> > "$DIFF"
+CHANGED=$(gh pr view <number> --json files --jq '.files[].path')
 ```
 
 If the PR does not exist, abort with "PR #<number> not found."
@@ -98,6 +88,69 @@ gh api "repos/{owner}/{repo}/pulls/<number>/comments" --jq '.[] | "[\(.path)] \(
 **Re-review tracking.** When prior review comments exist, they are the change request of record and GitHub is the source of truth, not any local file. Cross-check each prior finding against the updated diff and classify it resolved, still-open or newly-introduced. Lead the review with that summary, then review the new delta as usual.
 
 Linked issues in the PR body (`#NNN`, `fixes #NNN`, `closes #NNN`) are worth pulling: `gh issue view <n> --json title,body`.
+
+## The spec
+
+The most useful finding a review produces is often not a bug, it is that the change does something nobody asked for, or quietly skips something they did. That needs a written spec to check against, so find one before dispatching. In order:
+
+1. The linked issue from the PR body or the branch name (`gh issue view <n> --json title,body`), which pr mode has already fetched.
+2. `.grimoire/plan.md` in this worktree, when the branch was built from a plan.
+3. A path the user passed as an argument.
+4. Ask the user, once, only if the diff is large enough to be worth it.
+
+Found one, the spec lens runs against its text. Found none, the spec lens is skipped and the review says so in one line. Never reconstruct a spec from the diff and then grade the diff against it, because that always passes.
+
+## Triage
+
+Cost tracks tool calls, not diff size, so this gate is about which lenses have anything to find, never about how big the change is. Run it once, on flags only, before any dispatch.
+
+```bash
+LINES=$(wc -l < "$DIFF" | tr -d ' ')
+COUNT=$(printf '%s\n' "$CHANGED" | grep -c . || echo 0)
+
+printf '%s\n' "$CHANGED" | grep -Ev '\.(md|json|ya?ml|toml|lock|snap|txt)$|^docs/|^\.github/' | grep -q . \
+  || echo "TRIAGE no-source"
+
+printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|py|go|rb|java|kt|swift|cs|php)$' \
+  | grep -Ev '\.(test|spec)\.|_test\.|/(tests?|__tests__)/|\.d\.ts$|styled\.|/(types|constants)/' \
+  | while read -r f; do
+    STEM=$(basename "$f" | sed 's/\..*//')
+    printf '%s\n' "$CHANGED" | grep -qE "${STEM}[._-](test|spec)" || echo "TRIAGE untested $f"
+  done
+
+printf '%s\n' "$CHANGED" | grep -Eiq 'auth|login|session|token|password|crypt|secret|permission|policy|role|acl|sql|migration|api/|route|endpoint|middleware|upload|sanitiz|escape|cors|csrf' \
+  && echo "TRIAGE security-path"
+awk '/^\+\+\+ b\// { f=$2; skip = (f ~ /(\.(test|spec)\.|_test\.|\/(tests?|__tests__)\/)/) }
+     !skip && /^\+/ && /child_process|eval\(|dangerouslySetInnerHTML|innerHTML|process\.env|\.raw\(|execSync/ \
+       { print "TRIAGE security-pattern " f ":" $0; exit }' "$DIFF"
+```
+
+**Which lenses run.**
+
+| lens | runs when |
+|---|---|
+| correctness | always |
+| quality | always |
+| spec | a spec was found above |
+| tests | any `TRIAGE untested` line fired, or the diff touches test files |
+| security | `TRIAGE security-path` or `TRIAGE security-pattern` fired |
+
+`TRIAGE no-source` means the change is docs, config or lockfiles: skip every lens, read it yourself, and say so. A lens that no signal called for is a lens that was going to report nothing, and its report still costs a dispatch plus a full copy of the diff carried through all of its turns.
+
+**A flag is a prompt, not a verdict.** The security scan prints the matching line so you can dismiss it in one look: `document.body.innerHTML = ''` in a test teardown is not a security surface, and a lens dispatched on that finds nothing, slowly. Read the printed line, and if it is plainly benign, drop the lens and record why in the triage line.
+
+**Budget per lens**, counted in tool calls. Pass it in the dispatch, because the agent treats it as a ceiling.
+
+| diff size | correctness, quality | spec, tests, security |
+|---|---|---|
+| under 300 lines | 8 tool calls | 6 |
+| 300 to 1500 lines | 12 | 8 |
+| over 1500 lines | 15 | 10 |
+
+These are calibrated, not guessed. A lens spends about two turns per tool call, and its whole context is re-read on every one of them, so cost climbs with the square of the dig while findings flatten out early. On a 2000 line diff a fifteen call correctness lens costs 45% of an uncapped one and still reaches the third-hop file where the real bug usually sits. Twelve does not. Raise a budget when a lens says it was cut short on something load bearing, never by default.
+
+**State the triage in one line at the top of the review**, naming the lenses that ran, the ones that were skipped and why, and the budget. The user has to be able to see what was not looked at.
+
 
 ## Project knowledge
 
@@ -113,19 +166,21 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 ## Review engine
 
-Gather findings with the best engine the host supports, and state which path you used in one line at the top of the review.
+Run only the lenses triage selected, in this fixed order, and state the engine in one line at the top of the review.
 
-**Path A, parallel reviewers.** When the host exposes sub-agent dispatch, run the five lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name and the diff temp file path, plus the changed-file list and the wiki pages loaded above. For the quality lens, also paste the smell baseline below in full, because the agent has no other access to it.
-
-- **correctness**: logic errors, null and undefined, race conditions, edge cases
-- **quality**: naming, duplication, complexity, convention compliance, plus the smell baseline below
-- **architecture**: layering, separation of concerns, module boundaries, scope creep
+- **correctness**: logic errors, null and undefined, race conditions, edge cases, and performance defects (N+1, unbounded work, needless re-renders)
+- **quality**: naming, duplication, complexity, convention compliance, module boundaries and layering, plus the smell baseline below
+- **spec**: requirements missed, behaviour nobody asked for, requirements implemented wrong
 - **tests**: coverage gaps for the diff, mock completeness, determinism. Do not demand tests for config-only, type-only or pure UI changes.
 - **security**: input validation, authz gaps, secret and PII exposure, injection
 
+**Path A, parallel reviewers.** When the host exposes sub-agent dispatch, run the selected lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path, **the budget from triage**, and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, because neither agent has any other access to them.
+
+**Give each lens the diff once and let it stop.** The whole diff is re-read on every turn a lens takes, so an unbudgeted lens pays for the diff again on turn forty. That is what the budget is for, and it is not negotiable to buy thoroughness. If a lens reports that its budget cut an investigation short and the finding sounds load bearing, re-dispatch that one lens with a larger budget and a narrowed brief. One targeted second pass costs less than five unbounded first passes.
+
 **Never rerank across lenses.** Collect every agent's findings and report them side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses, and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. The lenses are separate on purpose, and the failure mode is one axis masking another, a correctness finding burying a spec mismatch it has nothing to do with. Severity ranks findings inside a lens, never between lenses.
 
-**Path B, single inline pass.** For hosts with no sub-agent dispatch: same five lenses, same smell baseline, done yourself in one sequential pass. Everything downstream is identical, including the no-rerank rule. Collapse to Path B for tiny diffs even when agents are available: a two file change does not justify five dispatches.
+**Path B, single inline pass.** For hosts with no sub-agent dispatch: same lenses, same smell baseline, same budget as a self-imposed ceiling, done yourself in one sequential pass. Everything downstream is identical, including the no-rerank rule. Collapse to Path B even when agents are available whenever triage selected only correctness and quality and the diff is under 300 lines: two dispatches and two copies of a small diff cost more than reading it once yourself.
 
 ## Smell baseline
 
@@ -180,6 +235,8 @@ Title, then **Mode**, **Date**, **Files changed**, **CI** (passing, failing, pen
 
 Derive the verdict from the worst severity present. Any Critical means **Request changes**. A Major with no Critical is a judgment call, default to **Needs discussion** unless the Majors are clearly optional. Only Minor and Nit means **Approve**. One sentence justifying it, plus the verdict's own evidence label.
 
+**The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. Preference is not a defect: a finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion. Before settling on anything worse than Approve, check that each blocking finding names a real consequence. If the honest count of those is zero, the verdict is Approve with the rest carried as follow-up.
+
 Save the review to `.grimoire/review.md`, overwriting the previous run. No dated filenames, no accumulation. For a PR you re-review, GitHub holds the durable record.
 
 ```bash
@@ -194,7 +251,7 @@ Then open it, unless the session is already inside the editor:
 
 Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
 
-On **Approve**, also produce the approval message below. Produce the daily update too, whatever the verdict, but only if a `voice` skill is installed.
+Then produce the message the verdict calls for: the approval message on **Approve**, the change request on **Request changes** or **Needs discussion**. Never both. Produce the daily update too, whatever the verdict, but only if a `voice` skill is installed.
 
 ## Fix, plan, or leave it
 
@@ -225,6 +282,40 @@ Only for **Approve**. Skip it entirely for Request changes and Needs discussion.
 Approval message (paste on the PR):
 > LGTM, clean and well scoped, happy to approve.
 > NOTE: the inline type-guard tidy-up is a nice-to-have follow-up, not a blocker.
+```
+
+## Change request
+
+Only for **Request changes** and **Needs discussion**. Skip it entirely for Approve, which has its own message above. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
+
+**Write it for the author, not for the reviewer.** The person reading it did not run the review, does not have the file open, and may not share your first language. Plain words, short sentences, no severity labels, no evidence levels, no lens names, no finding ids. Those belong in `.grimoire/review.md`, which is yours. Say what goes wrong, say when it goes wrong, say what would fix it.
+
+**What earns a place.** Only these three, and nothing else:
+
+- A blocker: the change does not work, or breaks something that worked.
+- A regression **this PR introduced**. A problem the diff merely sits next to is not one.
+- Something promised in an earlier round of review and still not delivered.
+
+Everything else stays out, including every Minor and Nit, every judgement call, and every pre-existing problem the author did not cause. A change request that lists twelve things trains the author to skim it. Three real ones get fixed.
+
+If nothing survives that filter, the verdict was wrong. Say so, and go back and settle it before writing anything to post.
+
+**Shape.** One line saying what the PR does and that it is close. Then one bullet per item: what breaks, when, and the fix direction in a few words. Reference the file plainly (`TreeView.tsx`), not as `path/to/file.ts:451`, unless the line number is the only way to find it. No headers. Never mention CI, checks, pipelines or build status. Close with one line making clear the rest is fine, so a request for changes does not read as a rejection.
+
+On a re-review, lead instead with what is now resolved, then list only what is still open and what is newly broken. Never repeat a point the author already fixed, and never repeat a point another reviewer already made.
+
+```
+Change request (paste on the PR):
+> Nice fix, the tree part works well. Two things before I approve.
+>
+> - In the list view, rescheduling from the right click menu loses focus
+>   now. The dialog used to put focus back and this change turns that off
+>   for the list. Passing undefined instead of the no-op restorer should
+>   sort it.
+> - The date shortcut in the account selector is not part of this ticket.
+>   Happy either way, but it is easier to review and revert on its own.
+>
+> Rest looks good to me.
 ```
 
 ## Daily update (only with a `voice` skill)
