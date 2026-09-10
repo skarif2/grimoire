@@ -62,23 +62,11 @@ Never reference `.grimoire/plan.md` or `.grimoire/review.md`: both get overwritt
 
 </context-section>
 
-<open-and-continue>
+<hand-it-over>
 
-Open the file, then a fresh window at the same working directory:
+Tell the user the handoff path and that `/plan` in a fresh session picks it up. Nothing else: never open the file in an editor, never spawn a window, never start the work. Writing the file is the whole job, and where the user reads it or continues from it is theirs to choose.
 
-```bash
-if [ -n "${VSCODE_GIT_IPC_HANDLE:-}" ] || [ "${TERM_PROGRAM:-}" = "vscode" ]; then
-  echo "  saved: $HANDOFF_PATH"
-else
-  code "$(pwd)" "$HANDOFF_PATH" 2>/dev/null || echo "  saved: $HANDOFF_PATH"
-fi
-
-tmux new-window -n "handoff-${SLUG}" -c "$(pwd)"
-```
-
-Tell the user the handoff path, that a `handoff-[slug]` window is ready at the same directory, and to run `/plan` there when they want to pick it up.
-
-</open-and-continue>
+</hand-it-over>
 
 <lifecycle>
 

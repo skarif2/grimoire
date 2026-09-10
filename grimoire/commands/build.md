@@ -121,10 +121,9 @@ These are prose other people read, so both prose skills apply: the `voice` skill
    ## Why
    ## How to test
    ```
-4. **Write it.** Write the filled draft to `.grimoire/pr.md`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Open it:
+4. **Write it.** Write the filled draft to `.grimoire/pr.md`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Create the folder if needed, then tell the user the path and stop. Never open it in an editor.
    ```bash
    mkdir -p .grimoire
-   code "$(pwd)" "$PR_FILE" 2>/dev/null || echo "  saved: $PR_FILE"
    ```
 
 ### 2. Daily update message (only with a `voice` skill)
