@@ -1,6 +1,6 @@
 ---
 name: review
-description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. Triages the diff to pick which lenses earn their cost, runs them as budgeted parallel agents when the host supports them, else a single inline pass. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
+description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. Defaults to one budgeted inline pass and fans out to parallel lens agents only when the diff is wide enough to say why. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
 argument-hint: "[staged | current | PR number | PR URL]"
 ---
 
@@ -102,7 +102,7 @@ Found one, the spec lens runs against its text. Found none, the spec lens is ski
 
 ## Triage
 
-Cost tracks tool calls, not diff size, so this gate is about which lenses have anything to find, never about how big the change is. Run it once, on flags only, before any dispatch.
+These are **signals, not gates**. They tell you what the diff contains so you can judge the engine and the lens set; they do not decide it for you. Run once, on flags only, before any dispatch. A file count cannot tell that three of five changed files are a barrel export, a styled block and a snapshot, and that judgement is the whole job here.
 
 ```bash
 LINES=$(wc -l < "$DIFF" | tr -d ' ')
@@ -111,12 +111,8 @@ COUNT=$(printf '%s\n' "$CHANGED" | grep -c . || echo 0)
 printf '%s\n' "$CHANGED" | grep -Ev '\.(md|json|ya?ml|toml|lock|snap|txt)$|^docs/|^\.github/' | grep -q . \
   || echo "TRIAGE no-source"
 
-printf '%s\n' "$CHANGED" | grep -E '\.(ts|tsx|js|jsx|py|go|rb|java|kt|swift|cs|php)$' \
-  | grep -Ev '\.(test|spec)\.|_test\.|/(tests?|__tests__)/|\.d\.ts$|styled\.|/(types|constants)/' \
-  | while read -r f; do
-    STEM=$(basename "$f" | sed 's/\..*//')
-    printf '%s\n' "$CHANGED" | grep -qE "${STEM}[._-](test|spec)" || echo "TRIAGE untested $f"
-  done
+printf '%s\n' "$CHANGED" | grep -qE '\.(test|spec)\.|_test\.|/(tests?|__tests__)/' \
+  && echo "TRIAGE tests-moved" || echo "TRIAGE no-test-touched"
 
 printf '%s\n' "$CHANGED" | grep -Eiq 'auth|login|session|token|password|crypt|secret|permission|policy|role|acl|sql|migration|api/|route|endpoint|middleware|upload|sanitiz|escape|cors|csrf' \
   && echo "TRIAGE security-path"
@@ -125,19 +121,13 @@ awk '/^\+\+\+ b\// { f=$2; skip = (f ~ /(\.(test|spec)\.|_test\.|\/(tests?|__tes
        { print "TRIAGE security-pattern " f ":" $0; exit }' "$DIFF"
 ```
 
-**Which lenses run.**
+**Reading the signals.**
 
-| lens | runs when |
-|---|---|
-| correctness | always |
-| quality | always |
-| spec | a spec was found above |
-| tests | any `TRIAGE untested` line fired, or the diff touches test files |
-| security | `TRIAGE security-path` or `TRIAGE security-pattern` fired |
+- `TRIAGE no-source`: docs, config or lockfiles only. Read it yourself, no lenses, say so.
+- `TRIAGE no-test-touched`: the change moved no test. Worth the tests lens if it changed behaviour, not if it is styling, types or copy. `tests-moved` means the author already thought about it, so the lens is checking their work rather than hunting an absence.
+- `TRIAGE security-path` and `security-pattern`: a name matched, which is not the same as a surface. The pattern scan prints the offending line so you can dismiss it in one look, since `document.body.innerHTML = ''` in a teardown is not an attack surface. No signal at all is a real answer: skip the lens.
 
-`TRIAGE no-source` means the change is docs, config or lockfiles: skip every lens, read it yourself, and say so. A lens that no signal called for is a lens that was going to report nothing, and its report still costs a dispatch plus a full copy of the diff carried through all of its turns.
-
-**A flag is a prompt, not a verdict.** The security scan prints the matching line so you can dismiss it in one look: `document.body.innerHTML = ''` in a test teardown is not a security surface, and a lens dispatched on that finds nothing, slowly. Read the printed line, and if it is plainly benign, drop the lens and record why in the triage line.
+**A flag is a prompt, not a verdict.** Every one of these is cheap to overrule with a reason. What you must not do is treat a firing signal as an obligation, because two of them fire on almost every real diff and a rule built on them is a constant wearing a signal's clothing.
 
 **Budget per lens**, counted in tool calls. Pass it in the dispatch, because the agent treats it as a ceiling.
 
@@ -149,7 +139,7 @@ awk '/^\+\+\+ b\// { f=$2; skip = (f ~ /(\.(test|spec)\.|_test\.|\/(tests?|__tes
 
 These are calibrated, not guessed. A lens spends about two turns per tool call, and its whole context is re-read on every one of them, so cost climbs with the square of the dig while findings flatten out early. On a 2000 line diff a fifteen call correctness lens costs 45% of an uncapped one and still reaches the third-hop file where the real bug usually sits. Twelve does not. Raise a budget when a lens says it was cut short on something load bearing, never by default.
 
-**State the triage in one line at the top of the review**, naming the lenses that ran, the ones that were skipped and why, and the budget. The user has to be able to see what was not looked at.
+**State the engine in one line at the top of the review**, naming the path and why, the lenses that ran, the ones skipped and why, and the budget. "Inline, 5 files but 3 substantive" and "Path A, 62 files across four subsystems" are both good lines. The user has to be able to see what was not looked at, and to disagree with the call.
 
 
 ## Project knowledge
@@ -166,7 +156,9 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 ## Review engine
 
-Run only the lenses triage selected, in this fixed order, and state the engine in one line at the top of the review.
+The lenses, in this fixed order. Correctness and quality carry any review. Spec runs when a spec was found, tests and security when the signals and your own read of the diff say there is something there.
+
+**One inline pass is the default.** Fan out only when you can say why in a sentence, and put that sentence in the engine line. This is the opposite of the usual instinct and it is deliberate: across 27 recorded reviews the inline pass returned a median of 12 findings, the same as the fan-outs, at a third of the cost. Five specialists earn their dispatches when a diff is genuinely wide enough that each has separate ground to cover, which is not most PRs. When you cannot name the reason, there is no reason.
 
 - **correctness**: logic errors, null and undefined, race conditions, edge cases, and performance defects (N+1, unbounded work, needless re-renders)
 - **quality**: naming, duplication, complexity, convention compliance, module boundaries and layering, plus the smell baseline below
@@ -174,13 +166,15 @@ Run only the lenses triage selected, in this fixed order, and state the engine i
 - **tests**: coverage gaps for the diff, mock completeness, determinism. Do not demand tests for config-only, type-only or pure UI changes.
 - **security**: input validation, authz gaps, secret and PII exposure, injection
 
-**Path A, parallel reviewers.** When the host exposes sub-agent dispatch, run the selected lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path, **the budget from triage**, and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, because neither agent has any other access to them.
+**Path B, single inline pass. The default.** Same lenses, same smell baseline, done yourself in one sequential pass, with the budget below as a ceiling you hold yourself to. Everything downstream is identical, including the no-rerank rule.
+
+**Path A, parallel reviewers. The exception.** Only with a stated reason, and only when the host exposes sub-agent dispatch. Run the selected lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path, **the budget from triage**, and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, because neither agent has any other access to them.
 
 **Give each lens the diff once and let it stop.** The whole diff is re-read on every turn a lens takes, so an unbudgeted lens pays for the diff again on turn forty. That is what the budget is for, and it is not negotiable to buy thoroughness. If a lens reports that its budget cut an investigation short and the finding sounds load bearing, re-dispatch that one lens with a larger budget and a narrowed brief. One targeted second pass costs less than five unbounded first passes.
 
 **Never rerank across lenses.** Collect every agent's findings and report them side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses, and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. The lenses are separate on purpose, and the failure mode is one axis masking another, a correctness finding burying a spec mismatch it has nothing to do with. Severity ranks findings inside a lens, never between lenses.
 
-**Path B, single inline pass.** For hosts with no sub-agent dispatch: same lenses, same smell baseline, same budget as a self-imposed ceiling, done yourself in one sequential pass. Everything downstream is identical, including the no-rerank rule. Collapse to Path B even when agents are available whenever triage selected only correctness and quality and the diff is under 300 lines: two dispatches and two copies of a small diff cost more than reading it once yourself.
+A host with no sub-agent dispatch has no choice: Path B, always.
 
 ## Smell baseline
 
