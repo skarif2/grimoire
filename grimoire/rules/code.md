@@ -8,7 +8,11 @@ Closed list of exceptions. If the comment does not name one, delete it.
 2. A toolchain marker: pragma, lint suppression, license header, type escape.
 3. A doc comment on a public API, only where every sibling in the file has one.
 
-Never restate the line. No section banners. No edit narration, so no "new", "added to fix X", "changed from". No doc blocks on internal functions. Explaining *what* means the name is wrong: fix the name. Ceiling is three lines. Longer is a wiki page: propose one if `.wiki/` exists, and link it once written.
+Never restate the line. No section banners. No edit narration, so no "new", "added to fix X", "changed from". No doc blocks on internal functions. Explaining *what* means the name is wrong: fix the name.
+
+Ceiling is three lines, on kinds 1 and 2 only. Past three the reason is usually not worked out yet, so cut it back to the reason. When it genuinely needs more and `.wiki/` exists, it is a wiki page: propose one, and link it once written. No wiki, the ceiling stands.
+
+Kind 3 is not counted. A doc block is already bounded by the shape its siblings use, which is the condition it was admitted under, so match that and stop. Counting its lines would only force it to contradict the convention it is there to follow.
 
 ## Tests
 
