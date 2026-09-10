@@ -263,6 +263,8 @@ The description above is context. This comment is the contract.
 
 Same source as the plan, different reader. The plan carries `verify:` steps for whoever executes it, the brief carries a contract for whoever opens the ticket. Do not paste the plan in, and do not reference `.grimoire/plan.md`, which the ticket's reader cannot see.
 
+This one gets posted under the user's own name, so both prose skills apply: the `voice` skill when one is installed owns the **register** (how it sounds), the `unslop` skill owns the **tells** (what must not appear). They govern the prose the brief is filled with, never its shape: the headings, the bold labels and the checkboxes above stay verbatim, because the contract is only readable if every brief looks the same. Without a `voice` skill, keep it plain and first person.
+
 Write it to `.grimoire/brief.md`, show it in chat, and hand over the command:
 
 ```bash
