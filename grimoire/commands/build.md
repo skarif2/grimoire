@@ -70,7 +70,7 @@ After all tasks pass their `verify:`, run one self-review pass on the change bef
    > - **fix: `<ids>`**: fix only the ones you name
    > - **skip**: leave them and proceed (they are still noted at wrap-up)
    >
-   Fix nothing until the user chooses. If there are zero findings, say so and proceed.
+   **The question is the turn's last action.** Once you have written "Self-review found N issues", the next thing that happens is the user's answer. No Edit, no Write, no re-running a `verify:` between the list and the reply, and never an edit "while waiting". Six of thirty-nine recorded self-reviews fixed code before the user answered, and every one of them took a judgement call away from the user. If there are zero findings, say so and proceed.
 
 4. **Apply approved fixes.** Minimum change per finding, same discipline as the tasks: touch only what the fix needs, match the surrounding style, remove anything the fix made unused.
 

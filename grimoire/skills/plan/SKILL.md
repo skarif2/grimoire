@@ -6,7 +6,7 @@ argument-hint: "<task description>"
 
 <what-to-do>
 
-Before writing any plan, run a focused interview to understand the task properly. Ask questions one at a time, waiting for an answer before continuing. Explore the codebase instead of asking when the answer can be found there.
+Before writing any plan, run a focused interview to understand the task properly. Ask questions one at a time, waiting for an answer before continuing. One question means one: an `AskUserQuestion` call carries exactly one entry in `questions`, never a bundle, because a bundle is a form and a form gets filled in without thought. A third of recorded question calls bundled several. Explore the codebase instead of asking when the answer can be found there.
 
 </what-to-do>
 
