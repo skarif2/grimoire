@@ -79,6 +79,15 @@ CHANGED=$(gh pr view <number> --json files --jq '.files[].path')
 
 If the PR does not exist, abort with "PR #<number> not found."
 
+**Whose PR is it.** This decides what the review is allowed to do, so settle it here, not later:
+
+```bash
+ME=$(gh api user --jq .login 2>/dev/null)
+AUTHOR=$(gh pr view <number> --json author --jq .author.login)
+```
+
+`AUTHOR` is not `ME` means you are a reviewer on someone else's work. You do not touch their code, you do not offer to, and you do not propose a plan to. The deliverable is the review file plus one postable message, nothing else. See **Fix, plan, or leave it**.
+
 Inline review comments, only if there are more than a handful:
 
 ```bash
@@ -249,7 +258,9 @@ Then produce the message the verdict calls for: the approval message on **Approv
 
 ## Fix, plan, or leave it
 
-A review that stops at the file is a dead end, so after saving it present the findings grouped by severity and ask, in the same options style `/build` uses:
+**Someone else's PR ends here.** When `AUTHOR` is not `ME`, the review is finished the moment the file is saved and the message is drafted. Do not offer to fix, do not offer a plan, do not suggest edits the author did not ask for, do not open their files to prepare one. Say what you found, hand over the change request or the approval message, and stop. A reviewer who arrives with patches has stopped reviewing and started taking over, and it is the author's PR to change. This is the common case for `/review <number>`, so treat the offer below as the exception rather than the default.
+
+For your own work (local mode, staged mode, or a PR you authored), a review that stops at the file is a dead end, so after saving it present the findings grouped by severity and ask, in the same options style `/build` uses:
 
 > Review found N issues. What next?
 > - **fix safe**: I fix the Critical and Major and the clear cut Minor, you keep the judgment calls
@@ -261,7 +272,7 @@ A review that stops at the file is a dead end, so after saving it present the fi
 
 **The tests lens is report only.** A coverage gap is reported, never fixed, because `rules/code.md` forbids tests nobody asked for. **fix safe** never writes a test: say the gap stands and let the user ask for it.
 
-On a fix, minimum change per finding, match the surrounding style, then re-check the changed lines once and stop. In **pr** mode only touch the tree when the PR branch is actually checked out here, otherwise say so and offer **plan** instead. On **plan**, hand `/plan` the Critical and Major findings with their `file:line` as the seed and let it drive.
+On a fix, minimum change per finding, match the surrounding style, then re-check the changed lines once and stop. In **pr** mode this only ever applies to a PR you authored, and only when its branch is checked out here; otherwise say so and stop. On **plan**, hand `/plan` the Critical and Major findings with their `file:line` as the seed and let it drive.
 
 ## Approval message
 
