@@ -148,6 +148,12 @@ awk '/^\+\+\+ b\// { f=$2; skip = (f ~ /(\.(test|spec)\.|_test\.|\/(tests?|__tes
 
 These are calibrated, not guessed. A lens spends about two turns per tool call, and its whole context is re-read on every one of them, so cost climbs with the square of the dig while findings flatten out early. On a 2000 line diff a fifteen call correctness lens costs 45% of an uncapped one and still reaches the third-hop file where the real bug usually sits. Twelve does not. Raise a budget when a lens says it was cut short on something load bearing, never by default.
 
+**The budget binds you too.** On Path B you are the reviewer, so the same numbers apply to your own investigating, and on Path A they apply to whatever you do after the lenses report. Count only investigation: fetching the diff, running triage, and writing the files are housekeeping and do not spend budget. Reading source to chase a finding does.
+
+This is the one that slips, so watch for it. A run on a 173 line styling diff opened with "budget 8 tool calls" and then spent 35, because a budget you set for yourself and are not handed reads as a suggestion. It is not. If you reach it and something is still unresolved, say so in the coverage line the way a lens would, rather than quietly continuing.
+
+**A helper dispatch is not free.** Sending an agent to answer one background question ("does this toolbar sit on a dark surface?") is fine, and it needs a budget in its prompt like any other dispatch: name the question, cap it at 5 tool calls, and ask for the answer in two lines. Uncapped, one of these ran 39 turns and 24 calls to settle a colour, which cost more than the review it was serving. Never dispatch a helper for something a grep in your own context would answer.
+
 **State the engine in one line at the top of the review**, naming the path and why, the lenses that ran, the ones skipped and why, and the budget. "Inline, 5 files but 3 substantive" and "Path A, 62 files across four subsystems" are both good lines. The user has to be able to see what was not looked at, and to disagree with the call.
 
 
@@ -182,7 +188,7 @@ The lenses, in this fixed order. Correctness and quality carry any review. Spec 
 - **tests**: coverage gaps for the diff, mock completeness, determinism. Do not demand tests for config-only, type-only or pure UI changes.
 - **security**: input validation, authz gaps, secret and PII exposure, injection
 
-**Path B, single inline pass. The default.** Same lenses, same smell baseline, done yourself in one sequential pass, with the budget below as a ceiling you hold yourself to. Everything downstream is identical, including the no-rerank rule.
+**Path B, single inline pass. The default.** Same lenses, same smell baseline, done yourself in one sequential pass, under the same budget a dispatched lens would get and with the same obligation to stop at it. Everything downstream is identical, including the no-rerank rule.
 
 **Path A, parallel reviewers. The exception.** Only with a stated reason, and only when the host exposes sub-agent dispatch. Run the selected lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path, **the budget from triage**, and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, because neither agent has any other access to them.
 
@@ -261,11 +267,18 @@ Then tell the user the path. Never open it in an editor: the file is `@` mention
 
 Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
 
-Then produce the message the verdict calls for: the approval message on **Approve**, the change request on **Request changes** or **Needs discussion**. Never both. Produce the daily update too, whatever the verdict, but only if a `voice` skill is installed.
+Then produce, in this order and before offering to post anything:
+
+1. The message the verdict calls for: the approval message on **Approve**, the change request on **Request changes** or **Needs discussion**. Never both.
+2. The daily update, whatever the verdict, whenever a `voice` skill is installed.
+
+**Offering to post is the last thing you do**, because it ends your turn waiting on an answer. Anything still unwritten when you ask that question does not get written. So write `message.md` and `standup.md` first, show both, then ask about posting.
 
 ## Fix, plan, or leave it
 
-**Someone else's PR ends here.** When `AUTHOR` is not `ME`, the review is finished the moment the file is saved and the message is drafted. Do not offer to fix, do not offer a plan, do not suggest edits the author did not ask for, do not open their files to prepare one. Say what you found, hand over the change request or the approval message, and stop. A reviewer who arrives with patches has stopped reviewing and started taking over, and it is the author's PR to change. This is the common case for `/review <number>`, so treat the offer below as the exception rather than the default.
+**Someone else's code is not yours to change.** When `AUTHOR` is not `ME`, do not offer to fix, do not offer a plan, do not suggest edits the author did not ask for, do not open their files to prepare one. A reviewer who arrives with patches has stopped reviewing and started taking over, and it is the author's PR to change. This is the common case for `/review <number>`, so treat the offer below as the exception rather than the default.
+
+**That bounds what you may touch, not what you must produce.** Every review still ends with all three artifacts: the review file, the message the verdict calls for, and the daily update. Skipping the daily update because the review "ended" at the change request is a bug, not restraint.
 
 For your own work (local mode, staged mode, or a PR you authored), a review that stops at the file is a dead end, so after saving it present the findings grouped by severity and ask, in the same options style `/build` uses:
 
@@ -334,6 +347,23 @@ Change request:
 > Rest looks good to me.
 ```
 
+## Daily update (only with a `voice` skill)
+
+**Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
+
+With one installed, produce a standup line whatever the verdict, through `voice`, with the `unslop` skill applied. `/build`'s daily update owns the canonical wording and the shared rules (no CI, no headers, no bullets, one short paragraph); only what differs for a review is repeated here.
+
+- Lead with the PR title verbatim and its number, then say what the PR actually does in one or two lines, pulled from the diff and description, not from a finding-by-finding log.
+- Approve: `Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.`
+- Request changes or Needs discussion, one line: `Reviewed <title> (#<num>), sent feedback on <the gist>.`
+
+```
+Daily update:
+> Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.
+```
+
+Write it to `.grimoire/standup.md`, next to `message.md`, so it survives the session and can be pasted or piped without scrolling back for it. There is no API for this one: standup lives in Slack or Discord, so posting it is always the user's own hand.
+
 ## Posting it
 
 A review is one GitHub review, not a body plus a scattering of loose comments. Bundle the verdict, the message and every inline note into a single API call, so the author gets one notification and one thread to answer.
@@ -396,23 +426,6 @@ Non-zero means do not post. Move each named finding into the body and re-check, 
 ```
 
 On your own PR the authorship gate has already ended the posting path anyway; this is the belt to its braces.
-
-## Daily update (only with a `voice` skill)
-
-**Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
-
-With one installed, produce a standup line whatever the verdict, through `voice`, with the `unslop` skill applied. `/build`'s daily update owns the canonical wording and the shared rules (no CI, no headers, no bullets, one short paragraph); only what differs for a review is repeated here.
-
-- Lead with the PR title verbatim and its number, then say what the PR actually does in one or two lines, pulled from the diff and description, not from a finding-by-finding log.
-- Approve: `Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.`
-- Request changes or Needs discussion, one line: `Reviewed <title> (#<num>), sent feedback on <the gist>.`
-
-```
-Daily update:
-> Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.
-```
-
-Write it to `.grimoire/standup.md`, next to `message.md`, so it survives the session and can be pasted or piped without scrolling back for it. There is no API for this one: standup lives in Slack or Discord, so posting it is always the user's own hand.
 
 ## Distillation
 
