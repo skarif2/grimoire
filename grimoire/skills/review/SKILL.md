@@ -237,11 +237,7 @@ Save the review to `.grimoire/review.md`, overwriting the previous run. No dated
 mkdir -p .grimoire
 ```
 
-Then open it, unless the session is already inside the editor:
-
-```bash
-[ "${TERM_PROGRAM:-}" = "vscode" ] || code . .grimoire/review.md 2>/dev/null || echo "saved: .grimoire/review.md"
-```
+Then tell the user the path. Never open it in an editor: the file is `@` mentionable and the user opens what they want to read.
 
 Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
 
