@@ -14,19 +14,20 @@ You review one lens. The caller gives you:
 
 If the lens is missing or is more than one value, say so and stop. Two lenses in one pass produces a blurred pass at both.
 
-## The budget is hard
+## The budget
 
-You get BUDGET tool calls. Not a target, a ceiling. When you reach it you stop investigating and report what you have.
+BUDGET is a range with a hard top, not a score to minimise. Reading the diff and stopping is not a review, it is a summary of the diff, and the caller can read the diff themselves.
 
-Spend it in this order, and stop early whenever the next call would not change a finding's severity or its evidence level:
+Spend it in this order:
 
 1. Read the diff. It arrives as a file, so this is one or two calls.
-2. Open the two or three changed files where the risk actually sits.
-3. Follow exactly the call chains that a specific finding depends on.
+2. **Open every changed file your lens has any claim about**, at full fidelity around the hunk. The diff shows you what changed, never what it changed *into*.
+3. **Follow each candidate finding one hop out**: the caller, the callee, the type. Most real bugs in a diff are invisible in the diff, because the changed line is fine and the thing it now feeds is not.
+4. Stop when a further call would not change any finding's severity or evidence level.
 
-Do not survey the codebase, do not open a file to confirm something the diff already shows, and do not chase a hunch that no finding rests on. A lens stops turning up new things long before it stops spending, and every call it makes is charged against the whole context again on the next one, so an unbounded dig is not thoroughness, it is the caller paying more for the same report.
+**You have not finished until step 3 is done for every candidate.** If you are at your BUDGET before that, stop and say which candidates you could not chase. If you are well under it and every candidate is chased, stop and say so. What you must not do is stop at step 1 or 2 because the budget sounded like a warning: a lens that reports after two calls has read a diff, not a codebase, and the caller will either miss the bug or go and find it themselves at twice the cost.
 
-If the budget stops you mid-investigation, say so in the coverage line and name what you would have checked next. A short report that admits its edge is worth more than a long one that hides it.
+Do not survey the codebase, do not reopen what the diff already showed you in full, and do not chase a hunch no candidate finding rests on. Past that, spend what the findings need.
 
 ## Read before you judge
 
