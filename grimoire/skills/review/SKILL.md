@@ -1,6 +1,6 @@
 ---
 name: review
-description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. Defaults to one budgeted inline pass and fans out to parallel lens agents only when the diff is wide enough to say why. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
+description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. One inline pass by default, parallel lens agents only for a diff too wide for one reader. The verdict, the findings that matter, the message to post and the daily update all land in chat, labelled for pasting. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
 argument-hint: "[staged | current | PR number | PR URL]"
 ---
 
@@ -25,7 +25,7 @@ Every diff command carries these pathspecs. They add bytes without signal.
 
 ## Gathering the diff
 
-Write the diff to a temp file and keep the path, and keep the changed-file list in `$CHANGED`, because triage and every dispatch below read both. Parallel reviewers open the file themselves, so a large diff is never pasted into the conversation once per lens.
+Write the diff to a temp file and keep the path, and keep the changed-file list in `$CHANGED`, because the engine line and every dispatch below read both. Parallel reviewers open the file themselves, so a large diff is never pasted into the conversation once per lens.
 
 ```bash
 DIFF=$(mktemp -t review-diff)
@@ -86,7 +86,7 @@ ME=$(gh api user --jq .login 2>/dev/null)
 AUTHOR=$(gh pr view <number> --json author --jq .author.login)
 ```
 
-`AUTHOR` is not `ME` means you are a reviewer on someone else's work. You do not touch their code, you do not offer to, and you do not propose a plan to. The deliverable is the review file plus one postable message, nothing else. See **Fix, plan, or leave it**.
+`AUTHOR` is not `ME` means you are a reviewer on someone else's work. You do not touch their code, you do not offer to, and you do not propose a plan to. The deliverable is the review, its message and the daily update, and nothing that touches their code. See **Output**.
 
 Inline review comments, only if there are more than a handful:
 
@@ -109,54 +109,6 @@ The most useful finding a review produces is often not a bug, it is that the cha
 
 Found one, the spec lens runs against its text. Found none, the spec lens is skipped and the review says so in one line. Never reconstruct a spec from the diff and then grade the diff against it, because that always passes.
 
-## Triage
-
-These are **signals, not gates**. They tell you what the diff contains so you can judge the engine and the lens set; they do not decide it for you. Run once, on flags only, before any dispatch. A file count cannot tell that three of five changed files are a barrel export, a styled block and a snapshot, and that judgement is the whole job here.
-
-```bash
-LINES=$(wc -l < "$DIFF" | tr -d ' ')
-COUNT=$(printf '%s\n' "$CHANGED" | grep -c . || echo 0)
-
-printf '%s\n' "$CHANGED" | grep -Ev '\.(md|json|ya?ml|toml|lock|snap|txt)$|^docs/|^\.github/' | grep -q . \
-  || echo "TRIAGE no-source"
-
-printf '%s\n' "$CHANGED" | grep -qE '\.(test|spec)\.|_test\.|/(tests?|__tests__)/' \
-  && echo "TRIAGE tests-moved" || echo "TRIAGE no-test-touched"
-
-printf '%s\n' "$CHANGED" | grep -Eiq 'auth|login|session|token|password|crypt|secret|permission|policy|role|acl|sql|migration|api/|route|endpoint|middleware|upload|sanitiz|escape|cors|csrf' \
-  && echo "TRIAGE security-path"
-awk '/^\+\+\+ b\// { f=$2; skip = (f ~ /(\.(test|spec)\.|_test\.|\/(tests?|__tests__)\/)/) }
-     !skip && /^\+/ && /child_process|eval\(|dangerouslySetInnerHTML|innerHTML|process\.env|\.raw\(|execSync/ \
-       { print "TRIAGE security-pattern " f ":" $0; exit }' "$DIFF"
-```
-
-**Reading the signals.**
-
-- `TRIAGE no-source`: docs, config or lockfiles only. Read it yourself, no lenses, say so.
-- `TRIAGE no-test-touched`: the change moved no test. Worth the tests lens if it changed behaviour, not if it is styling, types or copy. `tests-moved` means the author already thought about it, so the lens is checking their work rather than hunting an absence.
-- `TRIAGE security-path` and `security-pattern`: a name matched, which is not the same as a surface. The pattern scan prints the offending line so you can dismiss it in one look, since `document.body.innerHTML = ''` in a teardown is not an attack surface. No signal at all is a real answer: skip the lens.
-
-**A flag is a prompt, not a verdict.** Every one of these is cheap to overrule with a reason. What you must not do is treat a firing signal as an obligation, because two of them fire on almost every real diff and a rule built on them is a constant wearing a signal's clothing.
-
-**Budget per lens**, counted in tool calls. Pass it in the dispatch, because the agent treats it as a ceiling.
-
-| diff size | correctness, quality | spec, tests, security |
-|---|---|---|
-| under 300 lines | 8 tool calls | 6 |
-| 300 to 1500 lines | 12 | 8 |
-| over 1500 lines | 15 | 10 |
-
-These are calibrated, not guessed. A lens spends about two turns per tool call, and its whole context is re-read on every one of them, so cost climbs with the square of the dig while findings flatten out early. On a 2000 line diff a fifteen call correctness lens costs 45% of an uncapped one and still reaches the third-hop file where the real bug usually sits. Twelve does not. Raise a budget when a lens says it was cut short on something load bearing, never by default.
-
-**The budget binds you too.** On Path B you are the reviewer, so the same numbers apply to your own investigating, and on Path A they apply to whatever you do after the lenses report. Count only investigation: fetching the diff, running triage, and writing the files are housekeeping and do not spend budget. Reading source to chase a finding does.
-
-This is the one that slips, so watch for it. A run on a 173 line styling diff opened with "budget 8 tool calls" and then spent 35, because a budget you set for yourself and are not handed reads as a suggestion. It is not. If you reach it and something is still unresolved, say so in the coverage line the way a lens would, rather than quietly continuing.
-
-**A helper dispatch is not free.** Sending an agent to answer one background question ("does this toolbar sit on a dark surface?") is fine, and it needs a budget in its prompt like any other dispatch: name the question, cap it at 5 tool calls, and ask for the answer in two lines. Uncapped, one of these ran 39 turns and 24 calls to settle a colour, which cost more than the review it was serving. Never dispatch a helper for something a grep in your own context would answer.
-
-**State the engine in one line at the top of the review**, naming the path and why, the lenses that ran, the ones skipped and why, and the budget. "Inline, 5 files but 3 substantive" and "Path A, 62 files across four subsystems" are both good lines. The user has to be able to see what was not looked at, and to disagree with the call.
-
-
 ## Project knowledge
 
 Only when `.wiki/` exists. Check first, and if it is absent skip this whole section silently.
@@ -171,36 +123,15 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 ## Review engine
 
-The lenses, in this fixed order. Correctness and quality carry any review. Spec runs when a spec was found, tests and security when the signals and your own read of the diff say there is something there.
+Five lenses, in this order, and always all five: correctness (including performance defects), quality (with the smell baseline below, and structure), spec (when a spec was found), tests, security.
 
-**One inline pass is the default.** Fan out only when you can say why in a sentence, and put that sentence in the engine line. This is the opposite of the usual instinct and it is deliberate: across 27 recorded reviews the inline pass returned a median of 12 findings, the same as the fan-outs, at a third of the cost. When you cannot name the reason, there is no reason.
+**One inline pass, yourself, is the default.** Fan out to parallel reviewers only when a diff is genuinely too wide for one reader to hold at once, and say so in the engine line. A one or two file change never justifies five dispatches, and on a re-review the unit is the delta since the last round, which is almost always small. Across 27 recorded reviews the inline pass found the same dozen things the fan-outs did, at a third of the cost, so fanning out needs a reason and inline does not.
 
-**The test is signal, not size.** Ask whether parallel agents would find anything you would not, which is a different question from how many lines changed. A wide diff whose changes are all the same kind of change is one reader's job; a narrow diff where the security surface and the test story genuinely sit in different code is not. Two things to weigh before the line count:
+**When you do fan out**, dispatch the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (bare `review-lens` if the host does not namespace agents), one dispatch per lens, read-only. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, since neither agent has any other access to them. Take their findings as reported, with their evidence levels, rather than re-reading everything yourself afterwards.
 
-- **How much of it is substantive.** Count the files that carry logic, not the files git listed. Five changed files where three are a barrel export, a styled block and a snapshot is a three file review.
-- **Whether one reader can hold it at once.** If you can read the whole diff and keep it in your head, lenses are five readings of the same thing, and their reports will overlap rather than divide.
+**Never rerank across lenses.** Report findings side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. Severity ranks findings inside a lens, never between lenses.
 
-**On a re-review, the unit is the delta, not the PR.** When a previous round exists, the engine is sized on what changed since it, and the older findings are re-checked rather than re-derived. A 2000 line PR whose second round moved 90 lines is a 90 line review. Cross-check the prior findings against the current files, then review the delta, and say in the engine line which delta you sized on.
-
-- **correctness**: logic errors, null and undefined, race conditions, edge cases, and performance defects (N+1, unbounded work, needless re-renders)
-- **quality**: naming, duplication, complexity, convention compliance, module boundaries and layering, plus the smell baseline below
-- **spec**: requirements missed, behaviour nobody asked for, requirements implemented wrong
-- **tests**: coverage gaps for the diff, mock completeness, determinism. Do not demand tests for config-only, type-only or pure UI changes.
-- **security**: input validation, authz gaps, secret and PII exposure, injection
-
-**Path B, single inline pass. The default.** Same lenses, same smell baseline, done yourself in one sequential pass, under the same budget a dispatched lens would get and with the same obligation to stop at it. Everything downstream is identical, including the no-rerank rule.
-
-**Path A, parallel reviewers. The exception.** Only with a stated reason, and only when the host exposes sub-agent dispatch. Run the selected lenses in parallel through the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (fall back to the bare `review-lens` if the host does not namespace agents), one dispatch per lens. That agent is read-only, so no reviewer can edit. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path, **the budget from triage**, and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, because neither agent has any other access to them.
-
-**Give each lens the diff once and let it stop.** The whole diff is re-read on every turn a lens takes, so an unbudgeted lens pays for the diff again on turn forty. That is what the budget is for, and it is not negotiable to buy thoroughness.
-
-**Do not re-derive what the lenses already evidenced.** Every finding arrives with an evidence level, which exists so the caller does not have to go and look again. Reading the files yourself after four agents just read them is the most expensive way to run this skill: it is serial where they were parallel, unbudgeted where they were capped, and it lands in the one context that carries the whole review. Take the findings as reported and put the evidence level on the page.
-
-Two exceptions, both narrow. **A finding at evidence level 1** is unverified by its own admission, so either get it to level 2 with a single targeted read or report it as unverified in those words. **A lens that says its budget cut it short** on something load bearing gets that one lens re-dispatched, with a larger budget and a narrowed brief. One targeted second pass costs less than doing every lens's job again yourself.
-
-**Never rerank across lenses.** Collect every agent's findings and report them side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses, and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. The lenses are separate on purpose, and the failure mode is one axis masking another, a correctness finding burying a spec mismatch it has nothing to do with. Severity ranks findings inside a lens, never between lenses.
-
-A host with no sub-agent dispatch has no choice: Path B, always.
+**State the engine in one line at the top of the review**: inline or parallel, and why. "Inline, 5 files but 3 substantive" and "Parallel, 62 files across four subsystems" are both good lines.
 
 ## Smell baseline
 
@@ -249,54 +180,29 @@ Label every Critical and Major finding `evidence: 2` and so on, and label the ve
 
 ## Output
 
-Load `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for the format. Adapt depth to diff size. Sections in short:
+**Chat is the review.** The file is a copy for later. Everything below appears in the conversation, in this order, on one screen, with nothing after it that waits on an answer.
 
-Title, then **Mode**, **Date**, **Files changed**, **CI** (passing, failing, pending, not applicable). Then Summary, Risks (each with severity, `file:line` and its evidence level, flagging the escalated ones), Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Keep the Risks grouped by lens so the no-rerank rule survives into the file.
+1. **The verdict, first and as a heading.** `**Verdict: Approve**`, `**Verdict: Request changes**` or `**Verdict: Needs discussion**`, then one sentence saying why. Derive it from the worst severity present: any Critical means Request changes; a Major with no Critical defaults to Needs discussion unless the Majors are clearly optional; only Minor and Nit means Approve.
+2. **The findings that matter**, in a few short paragraphs, each with its `file:line`. Not the whole file, not every nit: what the user needs to know to act. A Critical or Major carries its evidence level in a word.
+3. **The message the verdict calls for**, in its own fenced block, labelled for pasting, written through `voice` when one is installed and `unslop` always. Exactly one of the three below.
+4. **The daily update**, in its own fenced block, whenever a `voice` skill is installed.
+5. **One line on distillation**: what durable thing surfaced, or "nothing durable to add".
 
-Derive the verdict from the worst severity present. Any Critical means **Request changes**. A Major with no Critical is a judgment call, default to **Needs discussion** unless the Majors are clearly optional. Only Minor and Nit means **Approve**. One sentence justifying it, plus the verdict's own evidence label.
+Then, and only then, one line offering to post the review to GitHub (see **Posting it**). Never in place of any of the above, never before it.
 
-**The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. Preference is not a defect: a finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion. Before settling on anything worse than Approve, check that each blocking finding names a real consequence. If the honest count of those is zero, the verdict is Approve with the rest carried as follow-up.
+**The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. A finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion.
 
-Save the review to `.grimoire/review.md`, overwriting the previous run. No dated filenames, no accumulation. For a PR you re-review, GitHub holds the durable record.
+**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md` and the standup line to `.grimoire/standup.md`. Say the paths in one line. Never open any of them in an editor.
 
 ```bash
 mkdir -p .grimoire
 ```
 
-Then tell the user the path. Never open it in an editor: the file is `@` mentionable and the user opens what they want to read.
-
-Give every finding an id in the file (`C1`, `M2`, `N3`, severity letter plus a number) so the user can name it in the next step.
-
-Then produce, in this order and before offering to post anything:
-
-1. The message the verdict calls for: the approval message on **Approve**, the change request on **Request changes** or **Needs discussion**. Never both.
-2. The daily update, whatever the verdict, whenever a `voice` skill is installed.
-
-**Offering to post is the last thing you do**, because it ends your turn waiting on an answer. Anything still unwritten when you ask that question does not get written. So write `message.md` and `standup.md` first, show both, then ask about posting.
-
-## Fix, plan, or leave it
-
-**Someone else's code is not yours to change.** When `AUTHOR` is not `ME`, do not offer to fix, do not offer a plan, do not suggest edits the author did not ask for, do not open their files to prepare one. A reviewer who arrives with patches has stopped reviewing and started taking over, and it is the author's PR to change. This is the common case for `/review <number>`, so treat the offer below as the exception rather than the default.
-
-**That bounds what you may touch, not what you must produce.** Every review still ends with all three artifacts: the review file, the message the verdict calls for, and the daily update. Skipping the daily update because the review "ended" at the change request is a bug, not restraint.
-
-For your own work (local mode, staged mode, or a PR you authored), a review that stops at the file is a dead end, so after saving it present the findings grouped by severity and ask, in the same options style `/build` uses:
-
-> Review found N issues. What next?
-> - **fix safe**: I fix the Critical and Major and the clear cut Minor, you keep the judgment calls
-> - **fix: `<ids>`**: fix only the ones you name
-> - **plan**: run `/plan` seeded with the Critical and Major findings
-> - **skip**: leave them, the file keeps the record
-
-**Fix nothing until the user chooses.** Zero findings, say so and move on.
-
-**The tests lens is report only.** A coverage gap is reported, never fixed, because `rules/code.md` forbids tests nobody asked for. **fix safe** never writes a test: say the gap stands and let the user ask for it.
-
-On a fix, minimum change per finding, match the surrounding style, then re-check the changed lines once and stop. In **pr** mode this only ever applies to a PR you authored, and only when its branch is checked out here; otherwise say so and stop. On **plan**, hand `/plan` the Critical and Major findings with their `file:line` as the seed and let it drive.
+**Someone else's PR is not yours to change.** When `AUTHOR` is not `ME`, never offer to fix, never offer a plan, never suggest edits the author did not ask for. The output above is the whole deliverable. On your own work (local, staged, or a PR you authored) you may add one line offering to fix the Critical and Major findings, and you fix nothing until the user says so. The tests lens is report only either way: a coverage gap is reported, never fixed, because `rules/code.md` forbids tests nobody asked for.
 
 ## Approval message
 
-Only for **Approve**. Skip it entirely for Request changes and Needs discussion. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
+Only for **Approve**. Skip it entirely for the other two verdicts. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
 
 - One or two lines. No headers, no bullets.
 - Never mention CI, checks, pipelines or build status.
@@ -304,7 +210,7 @@ Only for **Approve**. Skip it entirely for Request changes and Needs discussion.
 - Leftover Minor or Nit findings, or a pending Copilot or other review, still approve, then add one `NOTE:` line framing them as a follow-up and explicitly not a blocker. Several small things get summarised in that one line, not listed. Critical and Major findings never appear here, because they change the verdict.
 
 ```
-Approval message:
+Approval message (paste on the PR):
 > LGTM, clean and well scoped, happy to approve.
 > NOTE: the inline type-guard tidy-up is a nice-to-have follow-up, not a blocker.
 ```
@@ -313,7 +219,7 @@ Write it to `.grimoire/message.md` as well, so posting it is one flag away. See 
 
 ## Change request
 
-Only for **Request changes** and **Needs discussion**. Skip it entirely for Approve, which has its own message above. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
+Only for **Request changes**. Approve and Needs discussion each have their own message. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
 
 **Write it for the author, not for the reviewer.** The person reading it did not run the review, does not have the file open, and may not share your first language. Plain words, short sentences, no severity labels, no evidence levels, no lens names, no finding ids. Those belong in `.grimoire/review.md`, which is yours. Say what goes wrong, say when it goes wrong, say what would fix it.
 
@@ -334,7 +240,7 @@ On a re-review, lead instead with what is now resolved, then list only what is s
 Write it to `.grimoire/message.md` too, and list the findings that earned an inline anchor with their `file:line`. See **Posting it**.
 
 ```
-Change request:
+Change request (paste on the PR):
 > Nice fix, the tree part works well. Two things before I approve.
 >
 > - In the list view, rescheduling from the right click menu loses focus
@@ -347,6 +253,21 @@ Change request:
 > Rest looks good to me.
 ```
 
+## Question
+
+Only for **Needs discussion**. The verdict means the review could go either way and the author holds the missing fact, so the message is a question, not a request. It gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply `unslop`**. Plain and first person without one.
+
+- One question, two or three lines at most. Say what you saw, say what you are unsure of, ask the one thing that settles it.
+- It reads like Slack, because it usually goes there when the answer is quick. Label it for wherever it fits.
+- No severity words, no finding ids, no "please advise".
+
+```
+Question (paste in Slack or on the PR):
+> Quick one on #7788. Unschedule now always confirms first, even from the tree context menu where it used to be immediate. Was that intended as part of this fix, or did it come along with the dialog change? Fine either way, just want to know which before I approve.
+```
+
+Write it to `.grimoire/message.md` too.
+
 ## Daily update (only with a `voice` skill)
 
 **Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
@@ -358,7 +279,7 @@ With one installed, produce a standup line whatever the verdict, through `voice`
 - Request changes or Needs discussion, one line: `Reviewed <title> (#<num>), sent feedback on <the gist>.`
 
 ```
-Daily update:
+Daily update (paste in standup):
 > Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.
 ```
 
@@ -368,7 +289,7 @@ Write it to `.grimoire/standup.md`, next to `message.md`, so it survives the ses
 
 A review is one GitHub review, not a body plus a scattering of loose comments. Bundle the verdict, the message and every inline note into a single API call, so the author gets one notification and one thread to answer.
 
-**Draft, show, confirm, post. In that order, every time.** Posting is outward facing and it is under the user's name, so it never happens on the same turn it was drafted and never without an explicit yes. Show the message and the inline comments in chat first, offer to post, and if the user says nothing about posting, hand over the command and stop. Same rule the ticket brief follows in `/plan`.
+**Show first, offer last, post only on a yes.** Posting is outward facing and under the user's name, so it never happens on the turn it was drafted and never without an explicit yes. The offer is a single line after the verdict, the findings, the message and the daily update are all on screen. If the user says nothing about posting, that is a no.
 
 **Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.grimoire/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
 
