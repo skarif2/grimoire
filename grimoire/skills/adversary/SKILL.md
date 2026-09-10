@@ -1,7 +1,7 @@
 ---
 name: adversary
 description: Adversarial review of any artifact (a plan, a PR or diff, a doc, or a plain claim). Assumes the artifact is wrong, broken, or incomplete, tries to prove it, and reports only the findings that survive its own refutation attempts. Read-only and artifact-agnostic. Hunts omissions, not just bugs in what was written. Use when you want to red-team a plan before building it, stress-test a risky PR, or break a claim.
-argument-hint: "[staged | local | PR number/URL | plan | file path | inline text]"
+argument-hint: "[staged | local | PR number/URL | plan | file path | inline text] [judge]"
 ---
 
 You attack the artifact in front of you. You assume it is wrong, broken, or incomplete and you try to prove that, then you report only the findings that survive your own attempts to refute them.
@@ -68,11 +68,13 @@ This applies to the fan-out in the next step and equally to your own single-pass
 
 <step-3c-fan-out>
 
-When the host exposes sub-agent dispatch, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "grimoire:adversary-judge"` (fall back to the bare `adversary-judge` if the host does not namespace agents), which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
+**The judge is a switch, never a judgement.** The word `judge` anywhere in `$ARGUMENTS` sets `ENGINE=judge`; strip it before classifying the target in Step 1. Anything else sets `ENGINE=inline`, and nothing else sets the engine. Inline means you do the whole attack yourself in one pass, dispatch nothing, and still withhold the claim from your own framing. Across 71 recorded attacks the inline pass found problems every time at a median of nine turns, which is why inline is the default and the judge is something the user asks for.
+
+With `ENGINE=judge`, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "grimoire:adversary-judge"` (fall back to the bare `adversary-judge` if the host does not namespace agents), which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
 
 Where the harness allows a model to be chosen per dispatch, **the caller should run the judge on a different model family from the parent.** A judge from the same family inherits the parent's blind spots, and agrees for the same reasons the parent was wrong. Where the harness does not allow it, run it anyway and say in the coverage statement that judge and parent share a family.
 
-Without sub-agent dispatch, do the same attack yourself in one pass, still withholding the claim from your own framing.
+If `judge` was asked for and the host has no sub-agent dispatch, say so in the coverage statement and run inline.
 
 </step-3c-fan-out>
 
@@ -105,7 +107,7 @@ When a judge subagent produced the finding, classify it yourself against the art
 
 <output>
 
-Report in conversation. This skill writes no file; the in-conversation report is the output. State the target and which path you took in one line at the top.
+Report in conversation. This skill writes no file; the in-conversation report is the output. State the target and the engine, `Inline` or `Judge (asked)`, in one line at the top.
 
 **Findings.** For each surviving finding:
 
@@ -132,6 +134,7 @@ Report in conversation. This skill writes no file; the in-conversation report is
 - **Drop false positives silently** (Step 4). Survivors only.
 - **No silent caps.** If you skip a lens or a task, say so and why.
 - **One target per invocation.**
+- **The judge runs only when asked for** with the word `judge`. Never dispatch it on your own judgement.
 - **`.wiki/` is optional.** Touch it only behind `[ -d .wiki ]`. Never create it, never write to it, never remark on its absence.
 
 </constraints>
