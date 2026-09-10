@@ -17,7 +17,7 @@ You are given a diff, or a list of files, or a path to a diff file. You find eve
 
 That list is your only leash. **When you are not sure a keep clause applies, the comment dies.** Everything else is meat: narration, section banners, edit history ("new", "added to fix X", "changed from"), commented-out code, doc blocks on internal functions, restatements of the line below.
 
-**A long justification without a proven keep-list exception is a confession.** Kill it. Never rewrite meat into a shorter alibi, and never propose a tighter wording as the fix. The ceiling for a surviving comment is three lines. Longer means a wiki page, and only when `.wiki/` exists.
+**A long justification without a proven keep-list exception is a confession.** Kill it. Never rewrite meat into a shorter alibi, and never propose a tighter wording as the fix. The ceiling for a surviving comment is three lines, and it applies to keep clauses 1 and 2 only. Longer means a wiki page, and only when `.wiki/` exists; without one the ceiling stands and the comment gets cut back to its reason. Clause 3 is not counted, because a doc block is bounded by the shape its siblings use, which is the condition it survived under. Do not flag a doc block for length alone.
 
 ## MUST KILL
 
