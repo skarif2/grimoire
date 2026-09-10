@@ -94,7 +94,7 @@ Inline review comments, only if there are more than a handful:
 gh api "repos/{owner}/{repo}/pulls/<number>/comments" --jq '.[] | "[\(.path)] \(.user.login): \(.body)"'
 ```
 
-**Re-review tracking.** When prior review comments exist, they are the change request of record and GitHub is the source of truth, not any local file. Cross-check each prior finding against the updated diff and classify it resolved, still-open or newly-introduced. Lead the review with that summary, then review the new delta as usual.
+**Re-review tracking.** When prior review comments exist, they are the change request of record and GitHub is the source of truth, not any local file. Cross-check each prior finding against the updated diff and classify it resolved, still-open or newly-introduced. Lead the review with that summary, then review the new delta. **The delta is also what the engine is sized on**, see **Review engine**: a second round is nearly always an inline pass, because what moved since the last one is nearly always small.
 
 Linked issues in the PR body (`#NNN`, `fixes #NNN`, `closes #NNN`) are worth pulling: `gh issue view <n> --json title,body`.
 
@@ -167,7 +167,14 @@ There is no index file: each page's `summary` line is the map. From the touched 
 
 The lenses, in this fixed order. Correctness and quality carry any review. Spec runs when a spec was found, tests and security when the signals and your own read of the diff say there is something there.
 
-**One inline pass is the default.** Fan out only when you can say why in a sentence, and put that sentence in the engine line. This is the opposite of the usual instinct and it is deliberate: across 27 recorded reviews the inline pass returned a median of 12 findings, the same as the fan-outs, at a third of the cost. Five specialists earn their dispatches when a diff is genuinely wide enough that each has separate ground to cover, which is not most PRs. When you cannot name the reason, there is no reason.
+**One inline pass is the default.** Fan out only when you can say why in a sentence, and put that sentence in the engine line. This is the opposite of the usual instinct and it is deliberate: across 27 recorded reviews the inline pass returned a median of 12 findings, the same as the fan-outs, at a third of the cost. When you cannot name the reason, there is no reason.
+
+**The test is signal, not size.** Ask whether parallel agents would find anything you would not, which is a different question from how many lines changed. A wide diff whose changes are all the same kind of change is one reader's job; a narrow diff where the security surface and the test story genuinely sit in different code is not. Two things to weigh before the line count:
+
+- **How much of it is substantive.** Count the files that carry logic, not the files git listed. Five changed files where three are a barrel export, a styled block and a snapshot is a three file review.
+- **Whether one reader can hold it at once.** If you can read the whole diff and keep it in your head, lenses are five readings of the same thing, and their reports will overlap rather than divide.
+
+**On a re-review, the unit is the delta, not the PR.** When a previous round exists, the engine is sized on what changed since it, and the older findings are re-checked rather than re-derived. A 2000 line PR whose second round moved 90 lines is a 90 line review. Cross-check the prior findings against the current files, then review the delta, and say in the engine line which delta you sized on.
 
 - **correctness**: logic errors, null and undefined, race conditions, edge cases, and performance defects (N+1, unbounded work, needless re-renders)
 - **quality**: naming, duplication, complexity, convention compliance, module boundaries and layering, plus the smell baseline below
