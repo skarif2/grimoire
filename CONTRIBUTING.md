@@ -18,13 +18,13 @@ Match the surrounding prose. Concretely:
 
 - ASCII only. No box drawing, no typographic quotes, no arrows. Write `->` if you need one.
 - No dash punctuation. No em dash, no en dash, no `--` standing in for a comma. Use a comma, a colon, parentheses, or end the sentence. Flags like `--verbose` are fine, they are not punctuation.
-- Comments earn their place. The rule the toolkit enforces on your code is the rule it holds itself to, so read `claude-kit/rules/code.md` before adding one.
+- Comments earn their place. The rule the toolkit enforces on your code is the rule it holds itself to, so read `grimoire/rules/code.md` before adding one.
 
 ## Two things that need extra care
 
-**`claude-kit/hooks/` and `scripts/`.** This is the only executable code in the repo, and it runs on the machine of everyone who installs the plugin. Changes here get reviewed as a supply chain, not as a feature. Expect slow, sceptical review, and expect to justify any new dependency. There are currently zero.
+**`grimoire/hooks/` and `scripts/`.** This is the only executable code in the repo, and it runs on the machine of everyone who installs the plugin. Changes here get reviewed as a supply chain, not as a feature. Expect slow, sceptical review, and expect to justify any new dependency. There are currently zero.
 
-**Version numbers.** Do not touch them. `claude-kit/.claude-plugin/plugin.json` owns the version and the README quotes it twice. Stamping is a release step the maintainer runs with `node scripts/version.mjs`. A PR that bumps a version will be asked to drop that hunk.
+**Version numbers.** Do not touch them. `grimoire/.claude-plugin/plugin.json` owns the version and the README quotes it twice. Stamping is a release step the maintainer runs with `node scripts/version.mjs`. A PR that bumps a version will be asked to drop that hunk.
 
 ## Reviews
 

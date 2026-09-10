@@ -127,10 +127,11 @@ Skip this step and everything still works, you simply get no wiki. That is a sup
 
 Two ways, depending on how long you want to keep it around.
 
-**One session, nothing installed.** Clone the repo and point at it:
+**One session, nothing installed.** Clone the repo and point at the plugin inside it:
 
 ```bash
-claude --plugin-dir /path/to/grimoire/claude-kit
+git clone https://github.com/skarif2/grimoire.git
+claude --plugin-dir grimoire/grimoire
 ```
 
 Nothing is written to your config, and it is gone when the session ends.
