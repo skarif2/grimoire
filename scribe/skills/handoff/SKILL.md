@@ -41,6 +41,8 @@ SLUG=$(echo "[short title]" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[
 DATE=$(date +%Y-%m-%d)
 ROOT=$(git rev-parse --show-toplevel)
 mkdir -p "$ROOT/.scribe/handoffs"
+EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
+grep -qxF '.scribe' "$EXCLUDE" 2>/dev/null || printf '.scribe\n' >> "$EXCLUDE"
 HANDOFF_PATH="$ROOT/.scribe/handoffs/handoff_${DATE}-${SLUG}.md"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no branch")
 ```

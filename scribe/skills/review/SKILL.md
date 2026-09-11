@@ -211,7 +211,7 @@ Then, and only then, one line offering to post the review to GitHub (see **Posti
 
 **The file.** Also save the full review to `.scribe/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.scribe/message.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
 
-Exclude `.scribe` from git before the first write. Only `/build` and `/wiki-init` add that line otherwise, so on a repo that never ran either, the review would show up as untracked.
+Exclude `.scribe` from git before the first write, the same guard every writer of `.scribe/` carries, so the folder never shows as untracked whichever skill runs first.
 
 ```bash
 mkdir -p "$ROOT/.scribe"
