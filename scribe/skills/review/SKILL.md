@@ -301,6 +301,8 @@ A review is one GitHub review, not a body plus a scattering of loose comments. B
 
 **Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.scribe/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
 
+**Read `message.md` back first.** It must start with the message: no label, no `>`. Whatever is in it goes out verbatim.
+
 **Body only**, when nothing needs anchoring to a line:
 
 ```bash

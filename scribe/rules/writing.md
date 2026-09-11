@@ -1,10 +1,10 @@
 # Writing
 
-Two channels, picked by audience and never by artifact type. Both are always on, not on request.
+Two channels, picked by audience, never by artifact type. Both always on, not on request.
 
 ## To the user: unslop
 
-Chat replies, plans, reviews, handoffs, the brief in a recap, wiki pages, code comments: the working artifacts, where the user is the reader. The `unslop` skill owns the rules and their stable numbers, so none are restated here. Write to that standard by default, and load the skill for a real pass when the text runs long, when it lands in a file, or when another skill cites a rule by number.
+Chat replies, plans, reviews, handoffs, the brief in a recap, wiki pages, code comments: the working artifacts, where the user is the reader. The `unslop` skill owns the rules and their stable numbers, none are restated here. Write to that standard by default, and load the skill for a real pass when the text runs long, lands in a file, or another skill cites a rule by number.
 
 ## On the user's behalf to someone else: voice, then unslop
 
@@ -12,8 +12,10 @@ PR titles and bodies, commit subjects and bodies, review comments, approvals, ch
 
 `voice` owns the register (how it sounds), `unslop` owns the tells (what must not appear), and the skill that produces the message owns what goes in it. `/review` owns its approval message and its change request, `/build` owns the PR body, `/recap` owns the recap.
 
+**Chat shows it labelled and quoted, the file holds it bare.** In chat, the label line and the `>` on every line mark what to paste. In `message.md`, `recap.md`, `brief.md` and any file meant for `--body-file`, only the message goes in: first line is its first word, no label, no `>`. The file goes out as is.
+
 **Presence is the switch.** No `voice` skill installed: keep it plain and first person, never mention the absence.
 
 ## Both
 
-Unslop is a rewrite, not a review. It ends with corrected text, never with a list of what was wrong.
+Unslop is a rewrite, not a review: it ends with corrected text, never a list of what was wrong.
