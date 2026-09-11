@@ -34,7 +34,7 @@ ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 DIFF=$(mktemp -t review-diff)
 ```
 
-**Every `.grimoire/` path below means `$ROOT/.grimoire/`, written by absolute path.** A review touches temp files and fetched refs, and a bare `.grimoire/` resolves against wherever the run has wandered, which has put a review in a temp checkout. No `$ROOT` (started outside a repo, reviewing a PR by URL) means the review lives in chat only: write no files, and say so in one line.
+**Every `.scribe/` path below means `$ROOT/.scribe/`, written by absolute path.** A review touches temp files and fetched refs, and a bare `.scribe/` resolves against wherever the run has wandered, which has put a review in a temp checkout. No `$ROOT` (started outside a repo, reviewing a PR by URL) means the review lives in chat only: write no files, and say so in one line.
 
 **staged**
 
@@ -119,7 +119,7 @@ Linked issues in the PR body (`#NNN`, `fixes #NNN`, `closes #NNN`) are worth pul
 The most useful finding a review produces is often not a bug, it is that the change does something nobody asked for, or quietly skips something they did. That needs a written spec to check against, so find one before dispatching. In order:
 
 1. The linked issue from the PR body or the branch name (`gh issue view <n> --json title,body`), which pr mode has already fetched.
-2. `.grimoire/plan.md` in this worktree, when the branch was built from a plan.
+2. `.scribe/plan.md` in this worktree, when the branch was built from a plan.
 3. A path the user passed as an argument.
 4. Ask the user, once, only if the diff is large enough to be worth it.
 
@@ -145,7 +145,7 @@ Five lenses, in this order, and always all five: correctness (including performa
 
 **Read the hunk and its neighbourhood, not the file.** The diff carries three lines of context, which is enough to see a change and never enough to judge it, so the next read is always the file. Open it at the hunk: `Read` with `offset` a little above the first changed line and `limit` covering the hunk plus the enclosing function. Then find who the change touches with `Grep` on the changed symbol, and open those hits the same way, one hop out. A whole file is for two cases only: the change is structural (a module moved, an export reshaped, a class split) or the file is short enough that a window would cost more than the file. Reading the whole of every changed file was the single largest input in recorded plain reviews, and none of the findings needed it. In pr mode the same windows come from `git show` and `git grep` at `$PR_HEAD`, see **pr**.
 
-**When you do fan out**, dispatch the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (bare `review-lens` if the host does not namespace agents), one dispatch per lens, read-only. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, since neither agent has any other access to them. Take their findings as reported, with their evidence levels, rather than re-reading everything yourself afterwards.
+**When you do fan out**, dispatch the dedicated reviewer agent: the Agent tool with `subagent_type: "scribe:review-lens"` (bare `review-lens` if the host does not namespace agents), one dispatch per lens, read-only. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, since neither agent has any other access to them. Take their findings as reported, with their evidence levels, rather than re-reading everything yourself afterwards.
 
 **Never rerank across lenses.** Report findings side by side, one block per lens, in the fixed order above. Deduplicate an identical finding raised by two lenses and do nothing else to the set: never merge the lenses into one list, never reorder them against each other, never pick a single worst finding across lenses. Severity ranks findings inside a lens, never between lenses.
 
@@ -209,14 +209,14 @@ Then, and only then, one line offering to post the review to GitHub (see **Posti
 
 **The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. A finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion.
 
-**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
+**The file.** Also save the full review to `.scribe/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.scribe/message.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
 
-Exclude `.grimoire` from git before the first write. Only `/build` and `/wiki-init` add that line otherwise, so on a repo that never ran either, the review would show up as untracked.
+Exclude `.scribe` from git before the first write. Only `/build` and `/wiki-init` add that line otherwise, so on a repo that never ran either, the review would show up as untracked.
 
 ```bash
-mkdir -p "$ROOT/.grimoire"
+mkdir -p "$ROOT/.scribe"
 EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
-grep -qxF '.grimoire' "$EXCLUDE" 2>/dev/null || printf '.grimoire\n' >> "$EXCLUDE"
+grep -qxF '.scribe' "$EXCLUDE" 2>/dev/null || printf '.scribe\n' >> "$EXCLUDE"
 ```
 
 **Someone else's PR is not yours to change.** When `AUTHOR` is not `ME`, never offer to fix, never offer a plan, never suggest edits the author did not ask for. The output above is the whole deliverable. On your own work (local, staged, or a PR you authored) you may add one line offering to fix the Critical and Major findings, and you fix nothing until the user says so. The tests lens is report only either way: a coverage gap is reported, never fixed, because `rules/code.md` forbids tests nobody asked for.
@@ -236,13 +236,13 @@ Approval message (paste on the PR):
 > NOTE: the inline type-guard tidy-up is a nice-to-have follow-up, not a blocker.
 ```
 
-Write it to `.grimoire/message.md` as well, so posting it is one flag away. See **Posting it**.
+Write it to `.scribe/message.md` as well, so posting it is one flag away. See **Posting it**.
 
 ## Change request
 
 Only for **Request changes**. Approve and Needs discussion each have their own message. This one gets posted under the user's own name, so **write it through the `voice` skill when one is installed, and apply the `unslop` skill**. `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Without a `voice` skill, keep it plain and first person.
 
-**Write it for the author, not for the reviewer.** The person reading it did not run the review, does not have the file open, and may not share your first language. Plain words, short sentences, no severity labels, no evidence levels, no lens names, no finding ids. Those belong in `.grimoire/review.md`, which is yours. Say what goes wrong, say when it goes wrong, say what would fix it.
+**Write it for the author, not for the reviewer.** The person reading it did not run the review, does not have the file open, and may not share your first language. Plain words, short sentences, no severity labels, no evidence levels, no lens names, no finding ids. Those belong in `.scribe/review.md`, which is yours. Say what goes wrong, say when it goes wrong, say what would fix it.
 
 **What earns a place.** Only these three, and nothing else:
 
@@ -258,7 +258,7 @@ If nothing survives that filter, the verdict was wrong. Say so, and go back and 
 
 On a re-review, lead instead with what is now resolved, then list only what is still open and what is newly broken. Never repeat a point the author already fixed, and never repeat a point another reviewer already made.
 
-Write it to `.grimoire/message.md` too, and list the findings that earned an inline anchor with their `file:line`. See **Posting it**.
+Write it to `.scribe/message.md` too, and list the findings that earned an inline anchor with their `file:line`. See **Posting it**.
 
 ```
 Change request (paste on the PR):
@@ -287,7 +287,7 @@ Question (paste in Slack or on the PR):
 > Quick one on #7788. Unschedule now always confirms first, even from the tree context menu where it used to be immediate. Was that intended as part of this fix, or did it come along with the dialog change? Fine either way, just want to know which before I approve.
 ```
 
-Write it to `.grimoire/message.md` too.
+Write it to `.scribe/message.md` too.
 
 ## Recap
 
@@ -299,14 +299,14 @@ A review is one GitHub review, not a body plus a scattering of loose comments. B
 
 **Show first, offer last, post only on a yes.** Posting is outward facing and under the user's name, so it never happens on the turn it was drafted and never without an explicit yes. The offer is a single line after the verdict, the findings and the message are all on screen. If the user says nothing about posting, that is a no.
 
-**Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.grimoire/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
+**Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.scribe/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
 
 **Body only**, when nothing needs anchoring to a line:
 
 ```bash
-gh pr review <number> --approve         --body-file "$ROOT/.grimoire/message.md"
-gh pr review <number> --request-changes --body-file "$ROOT/.grimoire/message.md"
-gh pr review <number> --comment         --body-file "$ROOT/.grimoire/message.md"
+gh pr review <number> --approve         --body-file "$ROOT/.scribe/message.md"
+gh pr review <number> --request-changes --body-file "$ROOT/.scribe/message.md"
+gh pr review <number> --comment         --body-file "$ROOT/.scribe/message.md"
 ```
 
 **Body plus inline comments**, one review:
@@ -365,7 +365,7 @@ A review is a raw source. Its lasting value, not the per-line nits, compounds in
 `/build`'s deferred distillation owns the flow: folder choice, new versus update, the confirm batch, and never writing before approval. Page format and frontmatter live in `${CLAUDE_PLUGIN_ROOT}/templates/WIKI-PAGE-FMT.md`. Only the review specific parts are here.
 
 - Pick durable items out of the **findings and the diff** only: a recurring trap is a gotcha, a non-obvious behaviour of a module is a component page, a root cause or pattern worth remembering is a lesson or a concept. Per-PR nitpicks never qualify.
-- `source` names this review, the branch or the PR as plain text plus durable anchors (`path:line`, PR, commit), never a link, because `.grimoire/review.md` is overwritten every run.
+- `source` names this review, the branch or the PR as plain text plus durable anchors (`path:line`, PR, commit), never a link, because `.scribe/review.md` is overwritten every run.
 - If nothing durable surfaced, say so and skip. Never manufacture pages.
 
 The review guidelines (be specific, signal over noise, do not flag deliberate decisions, stay inside the diff) live in `REVIEW-FMT.md`, already loaded above. One more holds only here: acknowledge existing reviewer comments, do not repeat what has already been said.

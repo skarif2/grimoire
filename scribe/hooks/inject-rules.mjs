@@ -16,7 +16,7 @@ try {
 
   if (!body) process.exit(0);
   if (body.length > LIMIT) {
-    process.stderr.write(`grimoire: rules are ${body.length} chars, over the ${LIMIT} hook limit\n`);
+    process.stderr.write(`scribe: rules are ${body.length} chars, over the ${LIMIT} hook limit\n`);
     process.exit(0);
   }
 

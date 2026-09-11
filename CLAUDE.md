@@ -1,10 +1,10 @@
-# Grimoire
+# Scribe
 
-The plugin itself is `grimoire/`. The `.claude-plugin/marketplace.json` at the root is only the catalog that points at it.
+The plugin itself is `scribe/`. The `.claude-plugin/marketplace.json` at the root is only the catalog that points at it.
 
 ## Releasing
 
-The version is a date, `YY.MMDD.N`, where `N` counts releases within that same day. `grimoire/.claude-plugin/plugin.json` owns it and the README quotes it twice, in the badge and in Status.
+The version is a date, `YY.MMDD.N`, where `N` counts releases within that same day. `scribe/.claude-plugin/plugin.json` owns it and the README quotes it twice, in the badge and in Status.
 
 Do not edit those by hand. Run it:
 

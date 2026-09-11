@@ -1,6 +1,3 @@
 personal/
 removed/
 .DS_Store
-
-# The plugin lives here. Counters a global ignore for the grimoire/ scratch folder.
-!grimoire/

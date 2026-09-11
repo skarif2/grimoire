@@ -1,8 +1,8 @@
 # Handoff Format
 
-Handoffs live in `.grimoire/handoffs/`, named `handoff_{YYYY-MM-DD}-{slug}.md`. Create the folder lazily, only when the first handoff is written.
+Handoffs live in `.scribe/handoffs/`, named `handoff_{YYYY-MM-DD}-{slug}.md`. Create the folder lazily, only when the first handoff is written.
 
-They are per worktree, like everything else in `.grimoire/`. A handoff captured while working one ticket stays with that worktree. If the idea needs to outlive the worktree, promote it: turn it into a plan, or distil it into `.wiki/` if the project has one.
+They are per worktree, like everything else in `.scribe/`. A handoff captured while working one ticket stays with that worktree. If the idea needs to outlive the worktree, promote it: turn it into a plan, or distil it into `.wiki/` if the project has one.
 
 When a plan is created from a handoff, ask before deleting the handoff. The plan supersedes it.
 
@@ -29,7 +29,7 @@ When a plan is created from a handoff, ask before deleting the handoff. The plan
 - `.wiki/adr/{file}.md`: {one line on relevance}
 - `.wiki/concepts/{file}.md`: {one line on relevance}
 
-Omit this section when nothing in the wiki is relevant, or when the project has no wiki. Never reference `.grimoire/plan.md` or `.grimoire/review.md`: they are overwritten and pruned, so the pointer would dangle by the time this handoff is picked up.
+Omit this section when nothing in the wiki is relevant, or when the project has no wiki. Never reference `.scribe/plan.md` or `.scribe/review.md`: they are overwritten and pruned, so the pointer would dangle by the time this handoff is picked up.
 
 ## Suggested starting point
 

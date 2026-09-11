@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Reads the branch's ticket when there is one, drafts the plan in chat and refines it in a loop until you approve, then writes .grimoire/plan.md (and optionally an ADR, plus a ticket brief to post). Stays in refinement mode for further tweaks. Use with /plan to stress-test an idea.
+description: Pre-planning interview that explores the codebase, challenges assumptions, and sharpens the approach before committing to a plan. Reads the branch's ticket when there is one, drafts the plan in chat and refines it in a loop until you approve, then writes .scribe/plan.md (and optionally an ADR, plus a ticket brief to post). Stays in refinement mode for further tweaks. Use with /plan to stress-test an idea.
 argument-hint: "<task description>"
 ---
 
@@ -24,7 +24,7 @@ Build understanding silently. Do not dump file contents at the user, surface onl
 
 Before asking anything, load what is already known.
 
-1. **Handoffs.** `ls .grimoire/handoffs/*.md 2>/dev/null`. If a filename looks related to the task, ask before loading:
+1. **Handoffs.** `ls .scribe/handoffs/*.md 2>/dev/null`. If a filename looks related to the task, ask before loading:
    > "Found a handoff that might be related: `[filename]`. Load it as context for this plan?"
 
    Only load on confirmation, never silently, even if the user mentioned the handoff in their request. If loaded, remember its path for cleanup at the end. If nothing matches, skip.
@@ -202,21 +202,21 @@ Do not write the plan file during this loop. ADRs and context pages from Steps 5
 
 <output>
 
-Only after the user approves the draft, load `${CLAUDE_PLUGIN_ROOT}/templates/PLAN-FMT.md` and write the plan to `.grimoire/plan.md` at the repo root.
+Only after the user approves the draft, load `${CLAUDE_PLUGIN_ROOT}/templates/PLAN-FMT.md` and write the plan to `.scribe/plan.md` at the repo root.
 
 There is one active plan per worktree, so there is no dated filename and no dedup. If an unfinished plan is already there, ask before overwriting:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
-mkdir -p "$ROOT/.grimoire"
-if [ -f "$ROOT/.grimoire/plan.md" ] && grep -q '^\*\*Status:\*\* In Progress' "$ROOT/.grimoire/plan.md" 2>/dev/null; then
-  echo "An active plan already exists at .grimoire/plan.md; overwrite it?"
+mkdir -p "$ROOT/.scribe"
+if [ -f "$ROOT/.scribe/plan.md" ] && grep -q '^\*\*Status:\*\* In Progress' "$ROOT/.scribe/plan.md" 2>/dev/null; then
+  echo "An active plan already exists at .scribe/plan.md; overwrite it?"
 fi
 ```
 
 Write the file to PLAN-FMT exactly: its section order, its field names, its phased structure when the draft was phased, and its `verify:` rules. The template is the format contract, so do not restate or improvise it here.
 
-Tell the user the plan path and any wiki pages created. If `<ticket-context>` found a ticket, draft the brief now, see `<ticket-brief>`. Then one line, `Plan saved at .grimoire/plan.md (you can @.grimoire/plan.md it). Still in refinement mode: any further tweaks fold straight into the file.`, and the post-save choice as one `AskUserQuestion`:
+Tell the user the plan path and any wiki pages created. If `<ticket-context>` found a ticket, draft the brief now, see `<ticket-brief>`. Then one line, `Plan saved at .scribe/plan.md (you can @.scribe/plan.md it). Still in refinement mode: any further tweaks fold straight into the file.`, and the post-save choice as one `AskUserQuestion`:
 
 > What next?
 > - **Build**: execute the plan now (runs `/build`)
@@ -266,14 +266,14 @@ The description above is context. This comment is the contract.
 - the adjacent thing that looks related and is not
 ```
 
-Same source as the plan, different reader. The plan carries `verify:` steps for whoever executes it, the brief carries a contract for whoever opens the ticket. Do not paste the plan in, and do not reference `.grimoire/plan.md`, which the ticket's reader cannot see.
+Same source as the plan, different reader. The plan carries `verify:` steps for whoever executes it, the brief carries a contract for whoever opens the ticket. Do not paste the plan in, and do not reference `.scribe/plan.md`, which the ticket's reader cannot see.
 
 This one gets posted under the user's own name, so both prose skills apply: the `voice` skill when one is installed owns the **register** (how it sounds), the `unslop` skill owns the **tells** (what must not appear). They govern the prose the brief is filled with, never its shape: the headings, the bold labels and the checkboxes above stay verbatim, because the contract is only readable if every brief looks the same. Without a `voice` skill, keep it plain and first person.
 
-Write it to `.grimoire/brief.md`, show it in chat, and hand over the command:
+Write it to `.scribe/brief.md`, show it in chat, and hand over the command:
 
 ```bash
-gh issue comment <id> --repo <owner/repo> --body-file .grimoire/brief.md
+gh issue comment <id> --repo <owner/repo> --body-file .scribe/brief.md
 ```
 
 **Never run it.** Posting to a ticket is the user's, exactly like committing. Offer once, and drop it without comment if the user is not interested.
@@ -284,7 +284,7 @@ gh issue comment <id> --repo <owner/repo> --body-file .grimoire/brief.md
 
 After the plan file is written, the conversation enters **refinement mode**. The file is now the working document, keep it the source of truth so it never drifts from what was actually decided.
 
-- When the user refines scope, approach, tasks or decisions, edit `.grimoire/plan.md` directly with `Edit`, do not just discuss the change in chat. Confirm in one line what changed, "Updated, added a task for the migration step".
+- When the user refines scope, approach, tasks or decisions, edit `.scribe/plan.md` directly with `Edit`, do not just discuss the change in chat. Confirm in one line what changed, "Updated, added a task for the migration step".
 - Use judgment. Edit the file when the user is changing the plan, just answer when the user is only asking about it. Not every message is a plan edit.
 - Every task keeps its `verify:`. A refinement that adds a task adds a `verify:` too.
 

@@ -1,13 +1,13 @@
 {
-  "name": "grimoire",
-  "version": "26.911.5",
+  "name": "scribe",
+  "version": "26.911.6",
   "description": "A project wiki on an orphan git branch, checked out once and shared by every worktree, so a page written on one branch is readable from all of them with no merge and no conflict. Around it: planning that reads your ticket, multi lens review, and a comment police agent that never wrote the code it judges.",
   "author": {
     "name": "Sk Arif",
     "url": "https://github.com/skarif2"
   },
-  "homepage": "https://github.com/skarif2/grimoire",
-  "repository": "https://github.com/skarif2/grimoire",
+  "homepage": "https://github.com/skarif2/scribe",
+  "repository": "https://github.com/skarif2/scribe",
   "license": "MIT",
   "keywords": [
     "planning",
