@@ -6,7 +6,7 @@ argument-hint: "<task description>"
 
 <what-to-do>
 
-Before writing any plan, run a focused interview to understand the task properly. Ask questions one at a time, waiting for an answer before continuing. One question means one: an `AskUserQuestion` call carries exactly one entry in `questions`, never a bundle, because a bundle is a form and a form gets filled in without thought. A third of recorded question calls bundled several. Explore the codebase instead of asking when the answer can be found there.
+Before writing any plan, run a focused interview to understand the task properly. Ask questions one at a time, waiting for an answer before continuing, the way `rules/asking.md` sets out: one `AskUserQuestion` call, one entry in `questions`. A third of recorded question calls bundled several. Explore the codebase instead of asking when the answer can be found there.
 
 </what-to-do>
 
@@ -90,12 +90,18 @@ CONFIDENCE: ~{n}%
 
 Below 70, append on the same line what is still missing, so the number carries information instead of being a vibe. A high number you cannot defend is simply the wrong number.
 
-Then ask one question at a time, each carrying your own proposed answer, so the user reacts instead of composing from scratch:
+Then ask one question at a time, each carrying your own proposed answer, so the user reacts instead of composing from scratch. Each is one `AskUserQuestion` call:
 
 ```
-Q: {the one question most likely to change the plan}
-GUESS: {your answer, and the reasoning that produced it}
+question: {the one question most likely to change the plan}
+options:
+  {your guess} (Recommended)   {the reasoning that produced it}
+  {the real alternative}       {what it would change}
+  {another, if there is one}   {what it would change}
+multiSelect: true only when several answers can hold at once
 ```
+
+A question with no real options (a name, a number, a free description) is asked in plain text, still with your guess next to it.
 
 Wait for the reaction before the next question. The guess is the point: a wrong guess gets corrected faster than a blank question gets answered, and it puts your assumptions somewhere the user can see them. The failure mode is a polite user agreeing with a bad guess, so be visibly willing to be wrong and sometimes guess where you expect pushback.
 
@@ -168,11 +174,11 @@ When the interview has surfaced enough, **do not write the plan file yet.** Pres
    - **Non-trivial** (several files or components, multiple tasks, an area with a known gotcha or ADR, or a migration / auth / data / irreversible change) -> recommend **attack** first.
    - **Small and low risk** (one file, a task or two, nothing sensitive) -> recommend **save**.
 
-   Then ask, three choices, marking the one you would pick and why:
-   > Refine anything, attack it, or save?  **Recommended: {attack | save}** (one line reason)
-   > - **save**: write the plan file (you choose whether to run it after)
-   > - **change: `{what}`**: revise scope / tasks / approach / decisions
-   > - **attack**: run `/adversary` on this draft to red-team it before saving
+   Then ask, one `AskUserQuestion` with three options. The one you recommend goes first, its label ending in `(Recommended)` and its description carrying the one line reason:
+   > Refine anything, attack it, or save?
+   > - **Save**: write the plan file (you choose whether to run it after)
+   > - **Attack**: run `/adversary` on this draft to red-team it before saving
+   > - **Change something**: revise scope, tasks, approach or decisions, then ask what in plain text
 
    The recommendation is a nudge, not a gate. The user can pick anything, including something not listed. Do not offer `/build` here, that comes after the file is saved.
 
@@ -209,13 +215,11 @@ fi
 
 Write the file to PLAN-FMT exactly: its section order, its field names, its phased structure when the draft was phased, and its `verify:` rules. The template is the format contract, so do not restate or improvise it here.
 
-Tell the user the plan path and any wiki pages created. If `<ticket-context>` found a ticket, draft the brief now, see `<ticket-brief>`. Then present the post-save choice:
+Tell the user the plan path and any wiki pages created. If `<ticket-context>` found a ticket, draft the brief now, see `<ticket-brief>`. Then one line, `Plan saved at .grimoire/plan.md (you can @.grimoire/plan.md it). Still in refinement mode: any further tweaks fold straight into the file.`, and the post-save choice as one `AskUserQuestion`:
 
-> Plan saved at `.grimoire/plan.md` (you can `@.grimoire/plan.md` it).
-> - **build**: execute the plan now (runs `/build`)
-> - **done**: stop here, the plan is saved to run later
->
-> Still in refinement mode: any further tweaks fold straight into the file. Pick **build** or **done** when ready.
+> What next?
+> - **Build**: execute the plan now (runs `/build`)
+> - **Done**: stop here, the plan is saved to run later
 
 On **build**, invoke `/build` against this plan. On **done**, confirm it is saved and stop without executing.
 

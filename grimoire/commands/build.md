@@ -64,12 +64,13 @@ After all tasks pass their `verify:`, run one self-review pass on the change bef
 
    It **reports, it never edits**. Merge its findings into step 1's list, same severity tags and same id scheme, deduping anything you already caught. Skip the call on the same trivial diff that skips the whole pass.
 
-3. **Surface findings and ask.** Present them grouped by severity, in options style:
-   > Self-review found N issues. Fix which?
-   > - **fix safe**: I fix the Critical and Major and the clear cut Minor, you keep the judgment calls (never a new test)
-   > - **fix: `<ids>`**: fix only the ones you name
-   > - **skip**: leave them and proceed (they are still noted at wrap-up)
-   >
+3. **Surface findings and ask.** List them in chat grouped by severity, each with its id, then ask with one `AskUserQuestion`:
+   - **Four findings or fewer**: `multiSelect: true`, one checkbox per finding, label the id and a few words, description the fix. Fix what is checked. Skipping them all goes through Other.
+   - **More than four**: single choice, "Self-review found N issues. Fix which?"
+     - **Fix safe (Recommended)**: I fix the Critical and Major and the clear cut Minor, you keep the judgment calls (never a new test)
+     - **Pick by id**: fix only the ones you name, then ask which ids in plain text
+     - **Skip**: leave them and proceed (they are still noted at wrap-up)
+
    **The question is the turn's last action.** Once you have written "Self-review found N issues", the next thing that happens is the user's answer. No Edit, no Write, no re-running a `verify:` between the list and the reply, and never an edit "while waiting". Six of thirty-nine recorded self-reviews fixed code before the user answered, and every one of them took a judgement call away from the user. If there are zero findings, say so and proceed.
 
 4. **Apply approved fixes.** Minimum change per finding, same discipline as the tasks: touch only what the fix needs, match the surrounding style, remove anything the fix made unused.
