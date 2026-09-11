@@ -51,7 +51,7 @@ A plan is phased **only** when it contains a literal `## Phases` section. Detect
 ```md
 ## Phases
 
-### Phase: {name}
+### Phase 1: {name}
 
 **Id:** {kebab-case-id}
 **Depends on:** none
@@ -61,7 +61,7 @@ A plan is phased **only** when it contains a literal `## Phases` section. Detect
 
 - [ ] {Step 1}, verify: {concrete check}
 
-### Phase: {name}
+### Phase 2: {name}
 
 **Id:** {another-kebab-id}
 **Depends on:** {kebab-case-id}
@@ -74,6 +74,7 @@ A plan is phased **only** when it contains a literal `## Phases` section. Detect
 
 Per phase fields:
 
+- **The number** in the heading is reading order, top to bottom, so a person can say "phase 2". Nothing references it: `Depends on`, baseline refs, the resume handoff and `/build` all go through the id. Reordering or inserting a phase renumbers the headings and changes nothing else.
 - **Id:** stable kebab-case identifier, unique within the plan, derived from the phase name (`import-csv-endpoint`, not `phase-2`). Set once at authoring and **never changed**, even when phases are reordered, renamed, split or inserted. Every later reference (dependencies, baseline refs, the resume handoff) goes through the id, so a session picks work by id instead of by position.
 - **Depends on:** a list of phase ids this phase is blocked by, comma separated, or `none`. Ids only, never a name or a number.
 - **Status:** `pending` or `done`. `/build` flips it when the phase completes.
@@ -115,7 +116,7 @@ When even a single batch cannot stay green alone, keep the sequence and add a fi
 - The Goal is a single verifiable sentence. "Make it work" is not a goal.
 - Context is brief. Three to five bullets or a short paragraph, not a design doc.
 - Out of scope is mandatory. Explicit scope prevents creep.
-- Phase ids are kebab-case, unique within the plan, and permanent. Reordering, renaming or inserting a phase renumbers nothing, because nothing is numbered.
+- Phase ids are kebab-case, unique within the plan, and permanent. Reordering, renaming or inserting a phase renumbers the headings and nothing else, because nothing points at a number.
 
 ## Relationship to the wiki
 

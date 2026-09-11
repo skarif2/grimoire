@@ -211,17 +211,17 @@ When the plan has a `## Phases` section (detected in step 2), `/build` computes 
 
 ### 1. Compute the frontier, pick a phase, or report the plan's state
 
-Each phase carries a stable kebab-case `**Id:**` and a `**Depends on:**` list of ids (see `templates/PLAN-FMT.md`). Selection goes by id, never by position, so reordering or inserting phases changes nothing.
+Each phase carries a stable kebab-case `**Id:**` and a `**Depends on:**` list of ids (see `templates/PLAN-FMT.md`). Selection goes by id, never by position, so reordering or inserting phases changes nothing. The number in each heading is reading order for the user; show it, never select or key anything on it.
 
 Read the phase headers only and decide before touching anything:
 
 - **All phases `Status: done`**: the ticket is complete. Do **not** error. Run the final self-review if not already resolved, then go to *End of ticket* below.
 - **Otherwise compute the frontier**: every phase that is `pending` and whose `Depends on` ids are **all** `done`. `none` means no dependency, so it is on the frontier from the start.
   - **Exactly one phase on the frontier**: that is the phase to run.
-  - **More than one**: **ask which**, do not assume the first in file order. List each takeable phase as `<id>: <name>` with its task count, plus what is still blocked and on what. The user picks an id.
+  - **More than one**: **ask which**, do not assume the first in file order. Say in chat what is still blocked and on what, then one `AskUserQuestion` with an option per takeable phase, labelled `Phase <n>: <name>`, its id and task count in the description. The answer maps back to the id.
   - **Frontier is empty but phases remain**: a dependency cycle, a `Depends on` id that is still `pending` and itself unreachable, or a `Depends on` naming an id that does not exist. **Stop and surface the exact offending phases by id**, do not loop, stall, or guess. The user fixes the plan.
 
-If a phase has no `**Id:**` (a plan authored before ids), derive one from its heading, write it into the plan file, and rewrite any `Depends on` that referenced it by name or number. Do this before selecting, so baseline refs and later sessions stay stable.
+If a phase has no `**Id:**` (a plan authored before ids), derive one from the name in its heading, write it into the plan file, and rewrite any `Depends on` that referenced it by name or number. A heading with no number gets one in file order. Do this before selecting, so baseline refs and later sessions stay stable.
 
 ### 2. Set the phase baseline (non mutating working tree snapshot)
 
@@ -260,7 +260,7 @@ Use the **chosen phase's own id** for `${PHASE_ID}` so each phase gets a distinc
 
 If running this phase changed the picture (an assumption broke, the approach shifted, a later phase now looks wrong), prompt before continuing:
 
-> Phase `<id>` is done. Its outcome may affect later phases. Revise the remaining phases now, or proceed as planned?
+> Phase <n> (`<id>`) is done. Its outcome may affect later phases. Revise the remaining phases now, or proceed as planned?
 
 The plan is a living document (refinement mode applies). Fold any approved revisions into the remaining phases. Declining proceeds normally.
 
@@ -268,7 +268,7 @@ The plan is a living document (refinement mode applies). Fold any approved revis
 
 If phases still remain, do **not** continue into the next phase and do **not** distil or prune yet. Stop and tell the user:
 
-> Phase `<id>` done and marked. Frontier now: `<takeable ids>`. For a clean window, run `/compact` or start a new session, then `/build` for the next phase.
+> Phase <n> (`<id>`) done and marked. Takeable now: Phase <n> (`<id>`), one per takeable phase. For a clean window, run `/compact` or start a new session, then `/build` for the next phase.
 
 (A skill cannot auto compact or spawn a session, so the cross session break is a prompted user action.)
 
