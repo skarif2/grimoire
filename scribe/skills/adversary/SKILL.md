@@ -17,7 +17,7 @@ The target is polymorphic. One target per invocation. Classify `$ARGUMENTS`:
 - **`staged`**: the staged diff, `git diff --staged -U3 . ':(exclude)*lock.json' ':(exclude)dist/*' ':(exclude)build/*'`
 - **`local`**, or no argument on a dirty or ahead branch: the branch diff against its base, `git diff origin/<base>...HEAD -U3`. Detect the base the way `/review` does.
 - **a PR number or GitHub URL**: `gh pr diff <number>` for the diff and `gh pr view <number> --json title,body` for the stated goal. If `gh` is unavailable, say "PR targets need `gh` or a token; pass a file, diff, or text target instead" and stop.
-- **`plan`, or a path to a plan file**: read `.grimoire/plan.md`, the one active plan for this worktree, or the explicit path if one was given.
+- **`plan`, or a path to a plan file**: read `.scribe/plan.md`, the one active plan for this worktree, or the explicit path if one was given.
 - **any other file path**: read that file.
 - **inline text**: attack the text as given.
 - **empty with nothing to diff**: ask what to attack. There is no useful default.
@@ -70,7 +70,7 @@ This applies to the fan-out in the next step and equally to your own single-pass
 
 **The judge is a switch, never a judgement.** The word `judge` anywhere in `$ARGUMENTS` sets `ENGINE=judge`; strip it before classifying the target in Step 1. Anything else sets `ENGINE=inline`, and nothing else sets the engine. Inline means you do the whole attack yourself in one pass, dispatch nothing, and still withhold the claim from your own framing. Across 71 recorded attacks the inline pass found problems every time at a median of nine turns, which is why inline is the default and the judge is something the user asks for.
 
-With `ENGINE=judge`, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "grimoire:adversary-judge"` (fall back to the bare `adversary-judge` if the host does not namespace agents), which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
+With `ENGINE=judge`, run the attack through the dedicated judge agent: the Agent tool with `subagent_type: "scribe:adversary-judge"` (fall back to the bare `adversary-judge` if the host does not namespace agents), which is read-only. Give it the ARTIFACT verbatim at full fidelity (never a summary, Step 2's rule holds here too), the CONTRACT, and the lens to attack with. Nothing else.
 
 Where the harness allows a model to be chosen per dispatch, **the caller should run the judge on a different model family from the parent.** A judge from the same family inherits the parent's blind spots, and agrees for the same reasons the parent was wrong. Where the harness does not allow it, run it anyway and say in the coverage statement that judge and parent share a family.
 

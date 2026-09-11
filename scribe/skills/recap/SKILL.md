@@ -1,6 +1,6 @@
 ---
 name: recap
-description: Recap what got done, in two parts from the same material, a brief for you (a paragraph, then one bullet per change) and a short version to paste for other people. Covers the whole conversation, or only the part the argument names. Lands in chat and in .grimoire/recap.md. Use for /recap, and whenever the user asks for a recap, a summary of what we did, a daily update or a standup line. /build and /review offer it when they finish.
+description: Recap what got done, in two parts from the same material, a brief for you (a paragraph, then one bullet per change) and a short version to paste for other people. Covers the whole conversation, or only the part the argument names. Lands in chat and in .scribe/recap.md. Use for /recap, and whenever the user asks for a recap, a summary of what we did, a daily update or a standup line. /build and /review offer it when they finish.
 argument-hint: "[the part of the conversation to recap, e.g. the retry fix]"
 ---
 
@@ -67,12 +67,12 @@ Short version (to paste):
 > Wrapped up <title>. <what it does and why>.
 ```
 
-Then save the same to `$ROOT/.grimoire/recap.md`, overwriting the previous run, with `**Date:**` and `**Scope:**` (whole conversation, or the argument) under the title, the brief under `## What we did` and the short version under `## Short version`. Say the absolute path in one line. Never open it in an editor. No `$ROOT` means chat only: write no file, and say so in one line.
+Then save the same to `$ROOT/.scribe/recap.md`, overwriting the previous run, with `**Date:**` and `**Scope:**` (whole conversation, or the argument) under the title, the brief under `## What we did` and the short version under `## Short version`. Say the absolute path in one line. Never open it in an editor. No `$ROOT` means chat only: write no file, and say so in one line.
 
 ```bash
-mkdir -p "$ROOT/.grimoire"
+mkdir -p "$ROOT/.scribe"
 EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
-grep -qxF '.grimoire' "$EXCLUDE" 2>/dev/null || printf '.grimoire\n' >> "$EXCLUDE"
+grep -qxF '.scribe' "$EXCLUDE" 2>/dev/null || printf '.scribe\n' >> "$EXCLUDE"
 ```
 
 There is nothing to post. The short version goes wherever the user shares progress, and that is always their own hand.

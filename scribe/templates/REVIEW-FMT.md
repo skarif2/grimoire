@@ -1,8 +1,8 @@
 # Review Format
 
-The review is a single working file at `.grimoire/review.md`, gitignored and per worktree. Each run overwrites it. No dated filenames, no counters, no accumulation. For a PR you re-review, GitHub holds the durable record.
+The review is a single working file at `.scribe/review.md`, gitignored and per worktree. Each run overwrites it. No dated filenames, no counters, no accumulation. For a PR you re-review, GitHub holds the durable record.
 
-Create `.grimoire/` lazily, only when the first review is saved.
+Create `.scribe/` lazily, only when the first review is saved.
 
 ## Template
 
@@ -53,6 +53,6 @@ Create `.grimoire/` lazily, only when the first review is saved.
 
 A review is a raw source, so it never becomes a wiki page.
 
-When `.wiki/` exists, link the `[[adr_slug]]` or `[[concept_slug]]` you checked, so the conflicts section is traceable. At close, `/review` distils durable learnings into wiki pages that name this review as `source` in plain text, never as a link, because `.grimoire/review.md` is overwritten every run.
+When `.wiki/` exists, link the `[[adr_slug]]` or `[[concept_slug]]` you checked, so the conflicts section is traceable. At close, `/review` distils durable learnings into wiki pages that name this review as `source` in plain text, never as a link, because `.scribe/review.md` is overwritten every run.
 
 When `.wiki/` does not exist, skip both. Do not mention distillation.

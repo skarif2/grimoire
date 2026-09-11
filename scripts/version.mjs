@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 
-const PLUGIN = "grimoire/.claude-plugin/plugin.json";
+const PLUGIN = "scribe/.claude-plugin/plugin.json";
 const FILES = [PLUGIN, "README.md"];
 
 const now = new Date();

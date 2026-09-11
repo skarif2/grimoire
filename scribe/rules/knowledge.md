@@ -2,7 +2,7 @@
 
 Two root folders, different lifetimes.
 
-- `.grimoire/` ephemeral, per worktree, gitignored, always available. Holds `plan.md`, `review.md`, `pr.md`, `brief.md`, `message.md`, `recap.md` and `handoffs/`. Per worktree, so `plan.md` always means the current branch. Everything but `handoffs/` is overwritten each run, so nothing there is a durable record.
+- `.scribe/` ephemeral, per worktree, gitignored, always available. Holds `plan.md`, `review.md`, `pr.md`, `brief.md`, `message.md`, `recap.md` and `handoffs/`. Per worktree, so `plan.md` always means the current branch. Everything but `handoffs/` is overwritten each run, so nothing there is a durable record.
 - `.wiki/` durable, shared, committed. **Optional.**
 
 **Presence is the switch.** No `.wiki/`: never create it, never write to it, never offer, never mention its absence. `/wiki-init` creates it, and only when asked.

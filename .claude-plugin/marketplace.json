@@ -5,13 +5,13 @@
     "url": "https://github.com/skarif2"
   },
   "metadata": {
-    "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you."
+    "description": "Your agent relearns the codebase every session. Scribe gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you."
   },
   "plugins": [
     {
-      "name": "grimoire",
-      "source": "./grimoire",
-      "description": "Your agent relearns the codebase every session. Grimoire gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
+      "name": "scribe",
+      "source": "./scribe",
+      "description": "Your agent relearns the codebase every session. Scribe gives a project a durable wiki that every worktree shares, and a scratch folder for the ticket in front of you.",
       "category": "development"
     }
   ]

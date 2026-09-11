@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📜 Grimoire ✨
+# 📜 Scribe ✨
 
 ### Your agent relearns the codebase every session.
 
@@ -8,7 +8,7 @@ Give it somewhere to remember.
 
 <br/>
 
-[![version](https://img.shields.io/badge/version-26.911.5-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
+[![version](https://img.shields.io/badge/version-26.911.6-6366f1?style=flat-square)](https://github.com/skarif2/scribe)
 [![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
 [![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
 [![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
@@ -27,7 +27,7 @@ Then the context window fills, the session ends, and tomorrow you explain all of
 <tr>
 <td width="50%" valign="top">
 
-**`.grimoire/`**
+**`.scribe/`**
 
 What you are working on today. The plan, the review, the PR draft. Gitignored, and it dies with the branch.
 
@@ -47,7 +47,7 @@ Two folders at the root of your repo. That is the whole idea.
 ```mermaid
 flowchart LR
     T["your ticket"] --> P["/plan"]
-    P --> F[".grimoire/plan.md"]
+    P --> F[".scribe/plan.md"]
     F --> B["/build"]
     B --> V["/review"]
     V --> PR["pull request"]
@@ -82,15 +82,15 @@ flowchart LR
 Inside a Claude Code session:
 
 ```bash
-/plugin marketplace add skarif2/grimoire
-/plugin install grimoire
+/plugin marketplace add skarif2/scribe
+/plugin install scribe
 ```
 
 Or from your shell, without opening a session:
 
 ```bash
-claude plugin marketplace add skarif2/grimoire
-claude plugin install grimoire
+claude plugin marketplace add skarif2/scribe
+claude plugin install scribe
 ```
 
 The first command registers the catalog, the second installs the plugin from it. Restart Claude Code so it loads.
@@ -103,9 +103,9 @@ The first command registers the catalog, the second installs the plugin from it.
 claude plugin list
 ```
 
-`grimoire` should be there and enabled. In a session, typing `/` now offers `/plan`, `/build` and `/review`.
+`scribe` should be there and enabled. In a session, typing `/` now offers `/plan`, `/build` and `/review`.
 
-To see exactly what it adds to a session, `claude plugin details grimoire` prints every component and what each one costs you in tokens.
+To see exactly what it adds to a session, `claude plugin details scribe` prints every component and what each one costs you in tokens.
 
 <br/>
 
@@ -130,8 +130,8 @@ Two ways, depending on how long you want to keep it around.
 **One session, nothing installed.** Clone the repo and point at the plugin inside it:
 
 ```bash
-git clone https://github.com/skarif2/grimoire.git
-claude --plugin-dir grimoire/grimoire
+git clone https://github.com/skarif2/scribe.git
+claude --plugin-dir scribe/scribe
 ```
 
 Nothing is written to your config, and it is gone when the session ends.
@@ -141,8 +141,8 @@ Nothing is written to your config, and it is gone when the session ends.
 ```bash
 export CLAUDE_CONFIG_DIR=~/.claude-custom-dir
 
-claude plugin marketplace add skarif2/grimoire
-claude plugin install grimoire
+claude plugin marketplace add skarif2/scribe
+claude plugin install scribe
 claude
 ```
 
@@ -159,13 +159,13 @@ Open a new terminal, or unset the variable, and you are back on your normal setu
 ### Update, disable, remove
 
 ```bash
-claude plugin update grimoire
-claude plugin disable grimoire
-claude plugin uninstall grimoire
+claude plugin update scribe
+claude plugin disable scribe
+claude plugin uninstall scribe
 claude plugin marketplace remove skarif2
 ```
 
-Updating needs a restart to take effect. Disabling keeps it installed but dormant, which is the fastest way to tell whether Grimoire is behind some behaviour you did not expect. The last line drops the catalog itself, which registers under the name `skarif2` rather than the name of the repo.
+Updating needs a restart to take effect. Disabling keeps it installed but dormant, which is the fastest way to tell whether Scribe is behind some behaviour you did not expect. The last line drops the catalog itself, which registers under the name `skarif2` rather than the name of the repo.
 
 <br/>
 
@@ -244,7 +244,7 @@ Five lenses read your diff: correctness, quality, spec, tests, security. They re
 
 Anything a person will read goes through these before you see it: the PR body, the commit message, the review comment.
 
-If you write a skill of your own called `voice`, describing how you sound, Grimoire will use it for all of that, the short version of a recap included. Without one, it writes plain and first person.
+If you write a skill of your own called `voice`, describing how you sound, Scribe will use it for all of that, the short version of a recap included. Without one, it writes plain and first person.
 
 #### Quick answers
 
@@ -263,7 +263,7 @@ If you write a skill of your own called `voice`, describing how you sound, Grimo
 
 If you use git worktrees, you know the problem. Notes in one worktree are invisible from the others. Commit them and they ride a feature branch. Merge them and they conflict, because everyone is appending to the same file.
 
-Grimoire puts the wiki on its own orphan branch, checks it out exactly once, and points every worktree at that single copy.
+Scribe puts the wiki on its own orphan branch, checks it out exactly once, and points every worktree at that single copy.
 
 ```mermaid
 flowchart TD
@@ -322,7 +322,7 @@ You can run `/plan`, `/build`, `/review` and everything else on a repo with no w
 
 ## Status
 
-**Version 26.911.5.** Dated, not semantic: year, month, day. Young, and honest about it.
+**Version 26.911.6.** Dated, not semantic: year, month, day. Young, and honest about it.
 
 The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
 
@@ -332,13 +332,11 @@ The design is settled and every piece has been checked, but it has not yet been 
 
 <br/>
 
-## Why "Grimoire"
+## Why "Scribe"
 
-A grimoire is a book you keep, add to, and consult before attempting something difficult.
+Every project used to have one: the person who wrote down what was decided, where the traps were, and why that module looks wrong but is load bearing. When they left, the knowledge left with them.
 
-It is not a manual someone handed you. It is the one you wrote, from things that actually happened.
-
-That is the entire pitch. Your agent should have one.
+This gives your agent that job. It keeps the notes, reads them before it starts, and never writes a page without showing you first.
 
 <br/>
 
