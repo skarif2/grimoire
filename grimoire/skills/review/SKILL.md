@@ -1,6 +1,6 @@
 ---
 name: review
-description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. One inline pass, always, unless the argument carries `parallel`, which dispatches the five lens agents. The verdict, the findings that matter, the message to post and the daily update all land in chat, labelled for pasting. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
+description: Multi-lens code review (correctness, quality, spec, tests, security) for staged changes, local branch diffs, or open PRs. One inline pass, always, unless the argument carries `parallel`, which dispatches the five lens agents. The verdict, the findings that matter and the message to post all land in chat, labelled for pasting, then it offers a recap. Severity-rated, escalates findings that match the project's own gotchas and lessons, and writes the paste-ready message the verdict calls for, an approval on Approve or a change request on Request changes. Use /review for local diff, /review staged for pre-commit, /review <number or URL> for a GitHub PR.
 argument-hint: "[staged | current | PR number | PR URL] [parallel]"
 ---
 
@@ -102,7 +102,7 @@ ME=$(gh api user --jq .login 2>/dev/null)
 AUTHOR=$(gh pr view <number> --json author --jq .author.login)
 ```
 
-`AUTHOR` is not `ME` means you are a reviewer on someone else's work. You do not touch their code, you do not offer to, and you do not propose a plan to. The deliverable is the review, its message and the daily update, and nothing that touches their code. See **Output**.
+`AUTHOR` is not `ME` means you are a reviewer on someone else's work. You do not touch their code, you do not offer to, and you do not propose a plan to. The deliverable is the review and its message, and nothing that touches their code. See **Output**.
 
 Inline review comments, only if there are more than a handful:
 
@@ -203,14 +203,13 @@ Label every Critical and Major finding `evidence: 2` and so on, and label the ve
 1. **The verdict, first and as a heading.** `**Verdict: Approve**`, `**Verdict: Request changes**` or `**Verdict: Needs discussion**`, then one sentence saying why. Derive it from the worst severity present: any Critical means Request changes; a Major with no Critical defaults to Needs discussion unless the Majors are clearly optional; only Minor and Nit means Approve.
 2. **The findings that matter**, in a few short paragraphs, each with its `file:line`. Not the whole file, not every nit: what the user needs to know to act. A Critical or Major carries its evidence level in a word.
 3. **The message the verdict calls for**, in its own fenced block, labelled for pasting, written through `voice` when one is installed and `unslop` always. Exactly one of the three below.
-4. **The daily update**, in its own fenced block, whenever a `voice` skill is installed.
-5. **One line on distillation**: what durable thing surfaced, or "nothing durable to add".
+4. **One line on distillation**: what durable thing surfaced, or "nothing durable to add".
 
-Then, and only then, one line offering to post the review to GitHub (see **Posting it**). Never in place of any of the above, never before it.
+Then, and only then, one line offering to post the review to GitHub (see **Posting it**), and last, one line offering a recap (see **Recap**). Never in place of any of the above, never before it.
 
 **The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. A finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion.
 
-**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md` and the standup line to `.grimoire/standup.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
+**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
 
 Exclude `.grimoire` from git before the first write. Only `/build` and `/wiki-init` add that line otherwise, so on a repo that never ran either, the review would show up as untracked.
 
@@ -290,28 +289,15 @@ Question (paste in Slack or on the PR):
 
 Write it to `.grimoire/message.md` too.
 
-## Daily update (only with a `voice` skill)
+## Recap
 
-**Presence is the switch.** No `voice` skill installed means no daily update: do not produce one, do not offer, do not mention its absence.
-
-With one installed, produce a standup line whatever the verdict, through `voice`, with the `unslop` skill applied. `/build`'s daily update owns the canonical wording and the shared rules (no CI, no headers, no bullets, one short paragraph); only what differs for a review is repeated here.
-
-- Lead with the PR title verbatim and its number, then say what the PR actually does in one or two lines, pulled from the diff and description, not from a finding-by-finding log.
-- Approve: `Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.`
-- Request changes or Needs discussion, one line: `Reviewed <title> (#<num>), sent feedback on <the gist>.`
-
-```
-Daily update (paste in standup):
-> Reviewed and approved <title> (#<num>). <one or two lines on what changed and why>.
-```
-
-Write it to `.grimoire/standup.md`, next to `message.md`, so it survives the session and can be pasted or piped without scrolling back for it. There is no API for this one: standup lives in Slack or Discord, so posting it is always the user's own hand.
+The last line of the review, and only an offer: `Want a recap? It writes what we did and a short version to paste.` Never produce one unasked. On a yes, run the `recap` skill with this review as its material: the PR title and number, the verdict and the gist of the findings. The skill owns the wording, including the review openings.
 
 ## Posting it
 
 A review is one GitHub review, not a body plus a scattering of loose comments. Bundle the verdict, the message and every inline note into a single API call, so the author gets one notification and one thread to answer.
 
-**Show first, offer last, post only on a yes.** Posting is outward facing and under the user's name, so it never happens on the turn it was drafted and never without an explicit yes. The offer is a single line after the verdict, the findings, the message and the daily update are all on screen. If the user says nothing about posting, that is a no.
+**Show first, offer last, post only on a yes.** Posting is outward facing and under the user's name, so it never happens on the turn it was drafted and never without an explicit yes. The offer is a single line after the verdict, the findings and the message are all on screen. If the user says nothing about posting, that is a no.
 
 **Which findings go inline.** Only the ones the message already names: a blocker, a regression this PR introduced, or a promise not kept. Each needs a real `file:line` inside the diff. Everything else stays in `.grimoire/review.md`, which is yours. A review carrying twelve inline nits trains the author to collapse the whole thread.
 

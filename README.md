@@ -8,7 +8,7 @@ Give it somewhere to remember.
 
 <br/>
 
-[![version](https://img.shields.io/badge/version-26.911.0-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
+[![version](https://img.shields.io/badge/version-26.911.1-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
 [![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
 [![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
 [![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
@@ -232,6 +232,7 @@ Five reviewers read your diff at once: correctness, quality, architecture, tests
 |:--|:--|
 | **`/wiki-init`** | Gives this project a wiki. Once per repo. |
 | **`/handoff`** | Catches an idea that surfaced mid task and packages it for later. |
+| **`/recap`** | Sums up what you did: a brief for you, and a short version to paste. `/build` and `/review` offer one when they finish. |
 | **`/retro`** | Looks at how the session went and improves the setup, not the code. |
 
 #### Write like a person
@@ -243,7 +244,7 @@ Five reviewers read your diff at once: correctness, quality, architecture, tests
 
 Anything a person will read goes through these before you see it: the PR body, the commit message, the review comment.
 
-If you write a skill of your own called `voice`, describing how you sound, Grimoire will use it for all of that. It also unlocks the one thing that is off by default: a standup message drafted at the end of `/build` and `/review`. No `voice` skill means no standup message, because a line written in nobody's voice is not worth pasting anywhere.
+If you write a skill of your own called `voice`, describing how you sound, Grimoire will use it for all of that, the short version of a recap included. Without one, it writes plain and first person.
 
 #### Quick answers
 
@@ -321,7 +322,7 @@ You can run `/plan`, `/build`, `/review` and everything else on a repo with no w
 
 ## Status
 
-**Version 26.911.0.** Dated, not semantic: year, month, day. Young, and honest about it.
+**Version 26.911.1.** Dated, not semantic: year, month, day. Young, and honest about it.
 
 The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
 

@@ -40,7 +40,7 @@ Plan approved. Execute now.
    rm -f "$PLAN_FILE"   # prune on Done
    ```
 7. **Distil into the wiki (draft, then confirm).** See **Deferred distillation** below. **Gate it on `.wiki/` existing.** If the directory is absent the project has not opted in: skip this step entirely and silently, do not create the directory, do not write to it, do not offer to, and do not mention its absence.
-8. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary (files changed, things I did not touch, potential concerns). Add a 1 to 2 line daily update **only if a `voice` skill is installed**. See **PR draft and daily update** below.
+8. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary (files changed, things I did not touch, potential concerns), then end on one line offering a recap. See **PR draft and change summary** below.
 
 ## Execution guidelines
 
@@ -99,9 +99,9 @@ The finished plan is a raw source. Compile its durable knowledge into the wiki s
 5. If the change produced nothing durable (a trivial fix), **say so and skip**, never manufacture pages.
 6. After the pages are written, **propose the final doc-commit** covering the wiki changes, see **Propose commit(s), Final doc-commit**.
 
-## PR draft and daily update
+## PR draft and change summary
 
-The final wrap-up step, after distillation and the doc-commit proposal. All three artifacts here are drawn from the **same material**: the plan `Goal:`, the run's cumulative diff (the tree versus tree form, see **Propose commit(s), Scope the run's changes**), and the plan or phase `Notes:`. Do not invent facts (ticket numbers, PR links, deploy order, screenshots), leave the template's placeholders for the user to fill.
+The final wrap-up step, after distillation and the doc-commit proposal. Both artifacts here, and the recap if the user takes it, are drawn from the **same material**: the plan `Goal:`, the run's cumulative diff (the tree versus tree form, see **Propose commit(s), Scope the run's changes**), and the plan or phase `Notes:`. Do not invent facts (ticket numbers, PR links, deploy order, screenshots), leave the template's placeholders for the user to fill.
 
 These are prose other people read, so both prose skills apply: the `voice` skill when one is installed owns the **register** (how it sounds), the `unslop` skill owns the **tells** (what must not appear). Same pair governs the commit subject and body in **Propose commit(s)**.
 
@@ -126,26 +126,9 @@ These are prose other people read, so both prose skills apply: the `voice` skill
    mkdir -p .grimoire
    ```
 
-### 2. Daily update message (only with a `voice` skill)
+### 2. Change summary
 
-**Presence is the switch.** No `voice` skill installed means the user never opted into standup messages: do not produce one, do not offer, do not mention its absence. Skip to the change summary.
-
-With one installed, produce a short **daily update** (think standup) for the user to paste. **Write it through `voice`, then apply the `unslop` skill.** `voice` owns how it sounds, `unslop` owns the tells it must not carry, the rules below own what goes in it. Same gate and same treatment in `/review`, so the two stay consistent.
-
-- **Never mention CI, checks, pipelines, or build status.**
-- No section headers, no bullet lists. It is one short paragraph.
-- **Lead with the PR title** (the `pr.md` title just drafted), then say what the PR actually does in **1 to 2 lines** so a reader who never opened it knows what changed and why. Draw it from the run's cumulative diff and the plan `Goal:` and `Notes:`, not a file by file log. Append `(#<num>)` only if a PR number already exists, otherwise omit it.
-
-Present it in its own fenced block, clearly labelled as the thing to paste:
-
-```
-Daily update (paste in standup):
-> Wrapped up <PR title>. <1 to 2 lines on what changed and the user facing or technical payoff>.
-```
-
-### 3. Change summary
-
-Present it in chat, after the drafts. It does not go into `pr.md`. Three parts, in this order, always all three.
+Present it in chat, after the draft. It does not go into `pr.md`. Three parts, in this order, always all three.
 
 **Files changed.** The run's changed file list (tree versus tree), one line each on what changed in it. Not a diff replay.
 
@@ -163,6 +146,10 @@ Things I did not touch (intentionally):
 Potential concerns:
 - <concern>
 ```
+
+### 3. Offer a recap
+
+The last line of the run, after the change summary, and only an offer: `Want a recap? It writes what we did and a short version to paste.` Never produce one unasked. On a yes, run the `recap` skill with this run as its material. Silence is a no.
 
 ## Propose commit(s)
 
@@ -301,4 +288,4 @@ Reached only when step 1 found all phases `done`. Gate both steps on **every** p
    rm -f "$PLAN_FILE"   # prune on Done
    ```
 3. **Propose the final doc-commit.** After the wiki pages are written, propose the doc-commit covering those wiki changes, see **Propose commit(s), Final doc-commit**. Skipped when `.wiki/` does not exist.
-4. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary, all derived from the cumulative diff plus every phase's `Notes:`. Add a 1 to 2 line daily update **only if a `voice` skill is installed**. See **PR draft and daily update** above.
+4. **Draft the PR and the change summary.** As the last wrap-up step, draft a `pr.md` from the project's PR template (if any) and the three part change summary, all derived from the cumulative diff plus every phase's `Notes:`, then end on one line offering a recap. See **PR draft and change summary** above.
