@@ -8,7 +8,7 @@ Give it somewhere to remember.
 
 <br/>
 
-[![version](https://img.shields.io/badge/version-26.911.7-6366f1?style=flat-square)](https://github.com/skarif2/scribe)
+[![version](https://img.shields.io/badge/version-26.911.0-6366f1?style=flat-square)](https://github.com/skarif2/scribe)
 [![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
 [![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
 [![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
@@ -322,7 +322,7 @@ You can run `/plan`, `/build`, `/review` and everything else on a repo with no w
 
 ## Status
 
-**Version 26.911.7.** Dated, not semantic: year, month, day. Young, and honest about it.
+**Version 26.911.0.** Dated, not semantic: year, month, day. Young, and honest about it.
 
 The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
 
