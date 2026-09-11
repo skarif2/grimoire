@@ -207,7 +207,7 @@ Propose only. The user runs it.
 
 ## Phased execution
 
-When the plan has a `## Phases` section (detected in step 2), `/build` computes the frontier, runs **one takeable phase per session**, marks it done, and stops with a resume handoff so the next phase starts in a clean context. Single phase plans never enter this section. State lives entirely in the plan file (per phase `Status`, `Baseline`, `Notes`, plus task checkboxes), no separate state file.
+When the plan has a `## Phases` section (detected in step 2), `/build` computes the frontier, runs **one takeable phase per run**, marks it done, and stops with a resume handoff. The user decides whether the next phase runs in this session or a clean one. Single phase plans never enter this section. State lives entirely in the plan file (per phase `Status`, `Baseline`, `Notes`, plus task checkboxes), no separate state file.
 
 ### 1. Compute the frontier, pick a phase, or report the plan's state
 
@@ -258,19 +258,19 @@ Use the **chosen phase's own id** for `${PHASE_ID}` so each phase gets a distinc
 
 ### 4. Offer downstream phase revision
 
-If running this phase changed the picture (an assumption broke, the approach shifted, a later phase now looks wrong), prompt before continuing:
-
-> Phase <n> (`<id>`) is done. Its outcome may affect later phases. Revise the remaining phases now, or proceed as planned?
+If running this phase changed the picture (an assumption broke, the approach shifted, a later phase now looks wrong), ask before continuing, one `AskUserQuestion`: say in one line what changed and which phase it touches, then **Revise now** (fold the change into the remaining phases) or **Proceed as planned**. Skip the question when nothing changed.
 
 The plan is a living document (refinement mode applies). Fold any approved revisions into the remaining phases. Declining proceeds normally.
 
 ### 5. Stop with a resume handoff
 
-If phases still remain, do **not** continue into the next phase and do **not** distil or prune yet. Stop and tell the user:
+If phases still remain, do **not** continue into the next phase and do **not** distil or prune yet. Stop and tell the user, in plain text, since silence means nothing happens:
 
-> Phase <n> (`<id>`) done and marked. Takeable now: Phase <n> (`<id>`), one per takeable phase. For a clean window, run `/compact` or start a new session, then `/build` for the next phase.
+> Phase <n> (`<id>`) done and marked. Takeable now: Phase <n> (`<id>`), one per takeable phase. Say `continue` or run `/build` to take it here, `/compact` then `/build` for a clean window, or start a fresh session.
 
-(A skill cannot auto compact or spawn a session, so the cross session break is a prompted user action.)
+Add one nudge when the phase just finished was heavy (many files, several review rounds, a long back and forth): "this one was big, a clean window is probably worth it". It is a hint from the phase's shape, never a gate, because a session cannot measure its own context.
+
+On `continue`, or on `/build` in the same session, re-enter step 1: re-read the plan, recompute the frontier, and snapshot a fresh baseline for the chosen phase. That baseline includes the previous phase's uncommitted work, so the new phase's diff stays scoped to itself. A skill cannot compact or spawn a session, so the clean window is the user's action.
 
 ### End of ticket (only when every phase is `done`)
 
