@@ -30,8 +30,11 @@ Every diff command carries these pathspecs. They add bytes without signal.
 Write the diff to a temp file and keep the path, and keep the changed-file list in `$CHANGED`, because the engine line and every dispatch below read both. Parallel reviewers open the file themselves, so a large diff is never pasted into the conversation once per lens.
 
 ```bash
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 DIFF=$(mktemp -t review-diff)
 ```
+
+**Every `.grimoire/` path below means `$ROOT/.grimoire/`, written by absolute path.** A review touches temp files and fetched refs, and a bare `.grimoire/` resolves against wherever the run has wandered, which has put a review in a temp checkout. No `$ROOT` (started outside a repo, reviewing a PR by URL) means the review lives in chat only: write no files, and say so in one line.
 
 **staged**
 
@@ -74,12 +77,23 @@ One hit, use it. Several, list them and ask which. None, say there is no open PR
 Then fetch metadata and the diff:
 
 ```bash
-gh pr view <number> --json number,title,body,author,baseRefName,headRefName,state,statusCheckRollup,reviews,files
+gh pr view <number> --json number,title,body,author,baseRefName,headRefName,headRefOid,state,statusCheckRollup,reviews,files
 gh pr diff <number> > "$DIFF"
 CHANGED=$(gh pr view <number> --json files --jq '.files[].path')
 ```
 
 If the PR does not exist, abort with "PR #<number> not found."
+
+**Read the PR's files at its head, by ref, from where you stand.** The local checkout is some other branch, so the file on disk is the wrong version. Fetch the head from the remote that hosts the PR's base (`origin`, or `upstream` in a fork) and read through git:
+
+```bash
+git fetch --quiet origin "pull/<number>/head"
+PR_HEAD=$(git rev-parse FETCH_HEAD)
+git show "$PR_HEAD:<path>" | sed -n '<from>,<to>p'
+git grep -n '<symbol>' "$PR_HEAD"
+```
+
+Never `cd` into a clone or a worktree to read it, and never `gh pr checkout` over the user's branch. With no local repo, read by API instead: `gh api "repos/<owner>/<repo>/contents/<path>?ref=<headRefOid>" --jq .content | base64 -d`, owner and repo taken from the URL.
 
 **Whose PR is it.** This decides what the review is allowed to do, so settle it here, not later:
 
@@ -129,7 +143,7 @@ Five lenses, in this order, and always all five: correctness (including performa
 
 **The engine is the switch, never a judgement.** `ENGINE=inline` means you run all five lenses yourself, in one pass, and dispatch nothing, whatever the size of the diff. If the diff is wider than one pass can hold, say so in the engine line and suggest the user rerun with `parallel`; do not decide it for them. `ENGINE=parallel` means you dispatch the five lens agents below. Across 27 recorded reviews the inline pass found the same dozen things the fan-outs did, at a third of the cost, which is why inline is the default and fan-out is something the user asks for.
 
-**Read the hunk and its neighbourhood, not the file.** The diff carries three lines of context, which is enough to see a change and never enough to judge it, so the next read is always the file. Open it at the hunk: `Read` with `offset` a little above the first changed line and `limit` covering the hunk plus the enclosing function. Then find who the change touches with `Grep` on the changed symbol, and open those hits the same way, one hop out. A whole file is for two cases only: the change is structural (a module moved, an export reshaped, a class split) or the file is short enough that a window would cost more than the file. Reading the whole of every changed file was the single largest input in recorded plain reviews, and none of the findings needed it.
+**Read the hunk and its neighbourhood, not the file.** The diff carries three lines of context, which is enough to see a change and never enough to judge it, so the next read is always the file. Open it at the hunk: `Read` with `offset` a little above the first changed line and `limit` covering the hunk plus the enclosing function. Then find who the change touches with `Grep` on the changed symbol, and open those hits the same way, one hop out. A whole file is for two cases only: the change is structural (a module moved, an export reshaped, a class split) or the file is short enough that a window would cost more than the file. Reading the whole of every changed file was the single largest input in recorded plain reviews, and none of the findings needed it. In pr mode the same windows come from `git show` and `git grep` at `$PR_HEAD`, see **pr**.
 
 **When you do fan out**, dispatch the dedicated reviewer agent: the Agent tool with `subagent_type: "grimoire:review-lens"` (bare `review-lens` if the host does not namespace agents), one dispatch per lens, read-only. Do not improvise a reviewer prompt. Pass each dispatch the lens name, the diff temp file path and the changed-file list, plus the wiki pages loaded above. Pass the spec text to the spec lens and the smell baseline below, in full, to the quality lens, since neither agent has any other access to them. Take their findings as reported, with their evidence levels, rather than re-reading everything yourself afterwards.
 
@@ -196,10 +210,14 @@ Then, and only then, one line offering to post the review to GitHub (see **Posti
 
 **The bar is code health, not perfection.** Approve a change that definitely leaves the codebase better off, even when it is not how you would have written it. A finding that cannot name what breaks, what it costs to live with, or which documented standard it violates is a Nit at most, and a pile of Nits never adds up to Needs discussion.
 
-**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md` and the standup line to `.grimoire/standup.md`. Say the paths in one line. Never open any of them in an editor.
+**The file.** Also save the full review to `.grimoire/review.md`, overwriting the previous run, using `${CLAUDE_PLUGIN_ROOT}/templates/REVIEW-FMT.md` for its shape: Mode, Date, Files changed, CI, then Summary, Risks grouped by lens with severity and `file:line`, Missing or weak test coverage, Conflicts with project decisions, Nitpicks, Verdict. Give every finding an id (`C1`, `M2`, `N3`). Save the message to `.grimoire/message.md` and the standup line to `.grimoire/standup.md`. Say the paths in one line, absolute, so a file that landed anywhere but `$ROOT` shows on screen. Never open any of them in an editor.
+
+Exclude `.grimoire` from git before the first write. Only `/build` and `/wiki-init` add that line otherwise, so on a repo that never ran either, the review would show up as untracked.
 
 ```bash
-mkdir -p .grimoire
+mkdir -p "$ROOT/.grimoire"
+EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
+grep -qxF '.grimoire' "$EXCLUDE" 2>/dev/null || printf '.grimoire\n' >> "$EXCLUDE"
 ```
 
 **Someone else's PR is not yours to change.** When `AUTHOR` is not `ME`, never offer to fix, never offer a plan, never suggest edits the author did not ask for. The output above is the whole deliverable. On your own work (local, staged, or a PR you authored) you may add one line offering to fix the Critical and Major findings, and you fix nothing until the user says so. The tests lens is report only either way: a coverage gap is reported, never fixed, because `rules/code.md` forbids tests nobody asked for.
@@ -300,9 +318,9 @@ A review is one GitHub review, not a body plus a scattering of loose comments. B
 **Body only**, when nothing needs anchoring to a line:
 
 ```bash
-gh pr review <number> --approve         --body-file .grimoire/message.md
-gh pr review <number> --request-changes --body-file .grimoire/message.md
-gh pr review <number> --comment         --body-file .grimoire/message.md
+gh pr review <number> --approve         --body-file "$ROOT/.grimoire/message.md"
+gh pr review <number> --request-changes --body-file "$ROOT/.grimoire/message.md"
+gh pr review <number> --comment         --body-file "$ROOT/.grimoire/message.md"
 ```
 
 **Body plus inline comments**, one review:
