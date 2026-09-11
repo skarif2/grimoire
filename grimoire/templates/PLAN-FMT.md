@@ -44,7 +44,7 @@ Plan level fields:
 
 ## Phased plans
 
-Most plans are single phase: a flat `## Tasks` list executed in one session. A big ticket (many tasks, several components, multi day) may instead be split into phases wired by **blocking edges**, each executed in its own session with clean context.
+Most plans are single phase: a flat `## Tasks` list executed in one session. A big ticket (many tasks, several components, multi day) may instead be split into phases wired by **blocking edges**, each sized to fit one fresh context window and run one at a time.
 
 A plan is phased **only** when it contains a literal `## Phases` section. Detection is structural, never a keyword. A plan that merely says "phase" in prose is not phased.
 
