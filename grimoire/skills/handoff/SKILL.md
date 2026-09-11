@@ -39,8 +39,9 @@ Load `${CLAUDE_PLUGIN_ROOT}/templates/HANDOFF-FMT.md` and follow it exactly befo
 ```bash
 SLUG=$(echo "[short title]" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | sed 's/[^a-z0-9-]//g' | cut -c1-40)
 DATE=$(date +%Y-%m-%d)
-mkdir -p .grimoire/handoffs
-HANDOFF_PATH=".grimoire/handoffs/handoff_${DATE}-${SLUG}.md"
+ROOT=$(git rev-parse --show-toplevel)
+mkdir -p "$ROOT/.grimoire/handoffs"
+HANDOFF_PATH="$ROOT/.grimoire/handoffs/handoff_${DATE}-${SLUG}.md"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no branch")
 ```
 

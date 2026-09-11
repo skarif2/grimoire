@@ -8,7 +8,7 @@ Give it somewhere to remember.
 
 <br/>
 
-[![version](https://img.shields.io/badge/version-26.911.4-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
+[![version](https://img.shields.io/badge/version-26.911.5-6366f1?style=flat-square)](https://github.com/skarif2/grimoire)
 [![license](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](#license)
 [![claude code](https://img.shields.io/badge/Claude%20Code-plugin-f59e0b?style=flat-square)](https://claude.com/claude-code)
 [![status](https://img.shields.io/badge/status-early-64748b?style=flat-square)](#status)
@@ -202,7 +202,7 @@ It executes the plan, verifies every step, reviews its own diff, and drafts the 
 /review
 ```
 
-Five reviewers read your diff at once: correctness, quality, architecture, tests, security. They report side by side, and none of them is allowed to bury another's findings.
+Five lenses read your diff: correctness, quality, spec, tests, security. They report side by side, and none of them is allowed to bury another's findings.
 
 </td></tr>
 </table>
@@ -222,7 +222,7 @@ Five reviewers read your diff at once: correctness, quality, architecture, tests
 
 | Command | What it does |
 |:--|:--|
-| **`/review`** | Five lenses in parallel, severity rated, each finding labelled with how strong its evidence is. |
+| **`/review`** | Five lenses, severity rated, each finding labelled with how strong its evidence is. Add `parallel` to fan them out to agents. |
 | **`/adversary`** | Assumes your plan is wrong and tries to prove it. Reports only what survives its own refutation. |
 | **`/debug`** | Refuses to guess. No hypothesis until it has a command that reproduces the bug on demand. |
 
@@ -322,7 +322,7 @@ You can run `/plan`, `/build`, `/review` and everything else on a repo with no w
 
 ## Status
 
-**Version 26.911.4.** Dated, not semantic: year, month, day. Young, and honest about it.
+**Version 26.911.5.** Dated, not semantic: year, month, day. Young, and honest about it.
 
 The design is settled and every piece has been checked, but it has not yet been run in anger across a long stretch of real work. Expect rough edges, and please report them.
 

@@ -9,8 +9,9 @@ Plan approved. Execute now.
 
 1. Locate the plan. There is **one active plan per repo or worktree**, the single file `.grimoire/plan.md`. No partial name matching, and `/build` takes no arguments. Then **ensure `.grimoire/` is excluded from git**, idempotently: only `/wiki-init` writes that exclude line and the wiki is opt in, so on a project that never ran it the plan file would otherwise land in the baseline snapshot and in every `git add`.
    ```bash
-   PLAN_FILE=".grimoire/plan.md"
-   PR_FILE=".grimoire/pr.md"
+   ROOT=$(git rev-parse --show-toplevel)
+   PLAN_FILE="$ROOT/.grimoire/plan.md"
+   PR_FILE="$ROOT/.grimoire/pr.md"
    [ -f "$PLAN_FILE" ] || echo "No active plan at $PLAN_FILE, run /plan first."   # then stop
    EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
    grep -qxF '.grimoire' "$EXCLUDE" 2>/dev/null || printf '.grimoire\n' >> "$EXCLUDE"
@@ -122,9 +123,9 @@ These are prose other people read, so both prose skills apply: the `voice` skill
    ## Why
    ## How to test
    ```
-4. **Write it.** Write the filled draft to `.grimoire/pr.md`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Create the folder if needed, then tell the user the path and stop. Never open it in an editor.
+4. **Write it.** Write the filled draft to `$PR_FILE`, overwriting any previous. Like `plan.md` and `review.md` it is per worktree, gitignored and `@` mentionable. Create the folder if needed, then tell the user the path and stop. Never open it in an editor.
    ```bash
-   mkdir -p .grimoire
+   mkdir -p "$ROOT/.grimoire"
    ```
 
 ### 2. Change summary
@@ -218,7 +219,7 @@ Read the phase headers only and decide before touching anything:
 - **All phases `Status: done`**: the ticket is complete. Do **not** error. Run the final self-review if not already resolved, then go to *End of ticket* below.
 - **Otherwise compute the frontier**: every phase that is `pending` and whose `Depends on` ids are **all** `done`. `none` means no dependency, so it is on the frontier from the start.
   - **Exactly one phase on the frontier**: that is the phase to run.
-  - **More than one**: **ask which**, do not assume the first in file order. Say in chat what is still blocked and on what, then one `AskUserQuestion` with an option per takeable phase, labelled `Phase <n>: <name>`, its id and task count in the description. The answer maps back to the id.
+  - **More than one**: **ask which**, do not assume the first in file order. Say in chat what is still blocked and on what, then one `AskUserQuestion` with an option per takeable phase, labelled `Phase <n>: <name>`, its id and task count in the description. The answer maps back to the id. More than four takeable: the box cannot hold them, so list them in chat as `Phase <n> (<id>)` with task counts and ask for the id in plain text.
   - **Frontier is empty but phases remain**: a dependency cycle, a `Depends on` id that is still `pending` and itself unreachable, or a `Depends on` naming an id that does not exist. **Stop and surface the exact offending phases by id**, do not loop, stall, or guess. The user fixes the plan.
 
 If a phase has no `**Id:**` (a plan authored before ids), derive one from the name in its heading, write it into the plan file, and rewrite any `Depends on` that referenced it by name or number. A heading with no number gets one in file order. Do this before selecting, so baseline refs and later sessions stay stable.

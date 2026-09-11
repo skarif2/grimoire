@@ -10,9 +10,10 @@ A question with real options goes through `AskUserQuestion`, never as a plain te
 
 A quoted question in a skill gives the wording, not the format. If it has options, it still goes through the box.
 
-Plain text stays for four cases:
+Plain text stays for five cases:
 
 - No real options: a name, a number, "what did you expect to happen".
+- A yes or no before one action: load this handoff, delete it, overwrite the plan. Two answers is not a list.
 - A trailing offer a skill ends on, where silence means no, such as a recap or posting a review. Those never block.
 - A message drafted for someone else, even when it is phrased as a question.
 - Nobody to ask: a subagent, a headless run, or a host without the tool.

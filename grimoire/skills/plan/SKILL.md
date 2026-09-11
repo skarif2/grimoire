@@ -207,8 +207,9 @@ Only after the user approves the draft, load `${CLAUDE_PLUGIN_ROOT}/templates/PL
 There is one active plan per worktree, so there is no dated filename and no dedup. If an unfinished plan is already there, ask before overwriting:
 
 ```bash
-mkdir -p .grimoire
-if [ -f .grimoire/plan.md ] && grep -q '^\*\*Status:\*\* In Progress' .grimoire/plan.md 2>/dev/null; then
+ROOT=$(git rev-parse --show-toplevel)
+mkdir -p "$ROOT/.grimoire"
+if [ -f "$ROOT/.grimoire/plan.md" ] && grep -q '^\*\*Status:\*\* In Progress' "$ROOT/.grimoire/plan.md" 2>/dev/null; then
   echo "An active plan already exists at .grimoire/plan.md; overwrite it?"
 fi
 ```
