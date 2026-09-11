@@ -209,6 +209,8 @@ There is one active plan per worktree, so there is no dated filename and no dedu
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 mkdir -p "$ROOT/.scribe"
+EXCLUDE="$(git rev-parse --git-common-dir)/info/exclude"
+grep -qxF '.scribe' "$EXCLUDE" 2>/dev/null || printf '.scribe\n' >> "$EXCLUDE"
 if [ -f "$ROOT/.scribe/plan.md" ] && grep -q '^\*\*Status:\*\* In Progress' "$ROOT/.scribe/plan.md" 2>/dev/null; then
   echo "An active plan already exists at .scribe/plan.md; overwrite it?"
 fi

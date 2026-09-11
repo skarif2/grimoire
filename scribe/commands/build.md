@@ -7,7 +7,7 @@ Plan approved. Execute now.
 
 ## Instructions
 
-1. Locate the plan. There is **one active plan per repo or worktree**, the single file `.scribe/plan.md`. No partial name matching, and `/build` takes no arguments. Then **ensure `.scribe/` is excluded from git**, idempotently: only `/wiki-init` writes that exclude line and the wiki is opt in, so on a project that never ran it the plan file would otherwise land in the baseline snapshot and in every `git add`.
+1. Locate the plan. There is **one active plan per repo or worktree**, the single file `.scribe/plan.md`. No partial name matching, and `/build` takes no arguments. Then **ensure `.scribe/` is excluded from git**, idempotently, the same guard every writer of `.scribe/` carries: without it the plan file would land in the baseline snapshot and in every `git add`.
    ```bash
    ROOT=$(git rev-parse --show-toplevel)
    PLAN_FILE="$ROOT/.scribe/plan.md"
