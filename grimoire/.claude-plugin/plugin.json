@@ -1,6 +1,6 @@
 {
   "name": "grimoire",
-  "version": "26.910.4",
+  "version": "26.911.0",
   "description": "A project wiki on an orphan git branch, checked out once and shared by every worktree, so a page written on one branch is readable from all of them with no merge and no conflict. Around it: planning that reads your ticket, multi lens review, and a comment police agent that never wrote the code it judges.",
   "author": {
     "name": "Sk Arif",
